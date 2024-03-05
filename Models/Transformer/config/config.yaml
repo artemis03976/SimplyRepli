@@ -1,0 +1,22 @@
+project_name: transformer
+
+model:
+  embed_dim: 512
+  ffn_dim: 2048
+  num_layers: 6
+  num_heads: 8
+  dropout: 0.1
+  lang1: eng
+  lang2: cmn
+  reverse: True
+  network: transformer
+
+train:
+  learning_rate: 0.0001
+  epochs: 40
+  batch_size: 64
+
+inference:
+  num_samples: 64
+
+device: cuda
