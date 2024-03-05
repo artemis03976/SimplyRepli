@@ -1,0 +1,18 @@
+project_name: densenet
+
+model:
+  num_classes: 100
+  growth_rate: 12
+  dropout: 0.5
+  network: densenet121
+  img_size: 224
+
+train:
+  learning_rate: 0.001
+  epochs: 40
+  batch_size: 32
+
+inference:
+  num_samples: 32
+
+device: cuda

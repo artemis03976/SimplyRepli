@@ -1,0 +1,6 @@
+TODO.md
+
+__pycache__/
+.idea/
+checkpoints/
+datas/*

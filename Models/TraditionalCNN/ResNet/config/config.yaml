@@ -1,0 +1,16 @@
+project_name: resnet
+
+model:
+  num_classes: 100
+  network: resnet152
+  img_size: 224
+
+train:
+  learning_rate: 0.001
+  epochs: 30
+  batch_size: 64
+
+inference:
+  num_samples: 32
+
+device: cuda

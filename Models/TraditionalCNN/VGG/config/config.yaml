@@ -1,0 +1,17 @@
+project_name: vgg
+
+model:
+  num_classes: 100
+  network: vgg16
+  dropout: 0.5
+  img_size: 224
+
+train:
+  learning_rate: 0.001
+  epochs: 15
+  batch_size: 64
+
+inference:
+  num_samples: 64
+
+device: cuda

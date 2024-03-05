@@ -1,0 +1,17 @@
+project_name: googlenet
+
+model:
+  num_classes: 100
+  dropout: 0.5
+  network: googlenet
+  img_size: 224
+
+train:
+  learning_rate: 0.001
+  epochs: 40
+  batch_size: 64
+
+inference:
+  num_samples: 32
+
+device: cuda
