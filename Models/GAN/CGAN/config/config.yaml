@@ -1,0 +1,31 @@
+project_name: cgan
+
+model:
+  linear:
+    input_dim: 1024
+    latent_dim_linear: 100
+    G_hidden_dims: [128, 256, 512]
+    D_hidden_dims: [512, 256, 128]
+    output_dim: 1024
+  conv:
+    in_channel: 1
+    G_mid_channels: [256, 128, 64]
+    D_mid_channels: [64, 128, 256]
+    latent_dim_conv: 100
+    out_channel: 1
+  num_classes: 10
+  proj_dim: 10
+  network: cgan_conv
+
+train:
+  generator_lr: 0.0003
+  discriminator_lr: 0.0003
+  epochs: 50
+  batch_size: 64
+  d_step: 1
+  g_step: 1
+
+inference:
+  num_samples: 64
+
+device: cuda
