@@ -1,15 +1,13 @@
 import torch
 import torch.nn.functional as F
-from models.cgan_linear import LinearGenerator, LinearDiscriminator
-from models.cgan_conv import ConvGenerator, ConvDiscriminator
+from models.cgan_linear import LinearGenerator
+from models.cgan_conv import ConvGenerator
 from config.config import CGANConfig
 from global_utilis import save_and_load, plot
 
 
-def inference(config, model):
-    generator, discriminator = model
+def inference(config, generator):
     generator.eval()
-    discriminator.eval()
 
     latent_dim = config.latent_dim_linear if 'linear' in config.network else config.latent_dim_conv
 
@@ -42,13 +40,6 @@ def main():
             config.proj_dim,
         ).to(config.device)
 
-        discriminator = LinearDiscriminator(
-            config.input_dim,
-            config.D_hidden_dims,
-            config.num_classes,
-            config.proj_dim,
-        ).to(config.device)
-
     elif config.network == 'cgan_conv':
         generator = ConvGenerator(
             config.latent_dim_conv,
@@ -58,19 +49,12 @@ def main():
             config.proj_dim,
         ).to(config.device)
 
-        discriminator = ConvDiscriminator(
-            config.in_channel,
-            config.D_mid_channels,
-            config.num_classes,
-            config.proj_dim,
-        ).to(config.device)
-
     else:
         raise NotImplementedError(f'Unsupported network: {config.network}')
 
-    save_and_load.load_weight(config, (generator, discriminator))
+    save_and_load.load_weight(config, generator)
 
-    inference(config, (generator, discriminator))
+    inference(config, generator)
 
 
 if __name__ == '__main__':

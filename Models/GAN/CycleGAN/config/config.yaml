@@ -1,0 +1,24 @@
+project_name: cyclegan
+
+model:
+  num_blocks_g: 9
+  num_layers_d: 3
+  base_channel: 64
+  lambda_A: 10
+  lambda_B: 10
+  lambda_identity: 0.5
+  channel: 3
+  network: cyclegan
+
+train:
+  generator_lr: 0.0002
+  discriminator_lr: 0.0002
+  epochs: 30
+  batch_size: 1
+  d_step: 1
+  g_step: 1
+
+inference:
+  num_samples: 64
+
+device: cuda

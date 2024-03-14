@@ -1,5 +1,5 @@
 import torch
-from model import Generator, Discriminator
+from model import Generator
 from config.config import LSGANConfig
 from global_utilis import save_and_load, plot
 
@@ -28,15 +28,9 @@ def main():
         config.out_channel,
     ).to(config.device)
 
-    discriminator = Discriminator(
-        config.in_channel,
-        config.D_mid_channels,
-        config.img_size
-    ).to(config.device)
+    save_and_load.load_weight(config, generator)
 
-    save_and_load.load_weight(config, (generator, discriminator))
-
-    inference(config, (generator, discriminator))
+    inference(config, generator)
 
 
 if __name__ == '__main__':

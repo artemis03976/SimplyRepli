@@ -1,16 +1,17 @@
 from yaml import safe_load
 
 
-class SNGANConfig:
+class Pix2PixConfig:
     def __init__(self, config_path: str) -> None:
         self.config = safe_load(open(config_path, 'r', encoding='utf-8'))
 
         self.project_name = self.config['project_name']
 
-        self.G_mid_channels = self.config['model']['G_mid_channels']
-        self.D_mid_channels = self.config['model']['D_mid_channels']
-        self.latent_dim = self.config['model']['latent_dim']
-        self.feature_size = self.config['model']['feature_size']
+        self.num_blocks_g = self.config['model']['num_blocks_g']
+        self.num_layers_d = self.config['model']['num_layers_d']
+        self.base_channel = self.config['model']['base_channel']
+        self.ch_mult = self.config['model']['ch_mult']
+        self.l1_lambda = self.config['model']['l1_lambda']
 
         self.channel = self.config['model']['channel']
 

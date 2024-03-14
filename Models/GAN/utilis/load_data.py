@@ -1,35 +1,76 @@
 from torch.utils.data import DataLoader
 from torchvision import transforms, datasets
+from Models.GAN.utilis.dataset import Pix2PixDataset, CycleGANDataset
 
 
-transforms = transforms.Compose([
-        transforms.Resize(32),
-        transforms.ToTensor(),
-        transforms.Normalize([0.5], [0.5]),
-    ])
+def get_transform(config):
+    if config.channel == 1:
+        transform = transforms.Compose([
+                transforms.Resize(32),
+                transforms.ToTensor(),
+                transforms.Normalize([0.5], [0.5]),
+            ])
+    else:
+        transform = transforms.Compose([
+            transforms.Resize((256, 256)),
+            transforms.ToTensor(),
+            transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
+        ])
+
+    return transform
 
 
 def get_train_loader(config):
-    mnist_train = datasets.MNIST(
-        root='../../../datas/mnist',
-        train=True,
-        transform=transforms,
-        download=True
-    )
+    if config.network == 'pix2pix':
+        train_dataset = Pix2PixDataset(
+            root='../../../datas/pix2pix/cityscapes',
+            train=True,
+            transform=get_transform(config)
+        )
 
-    train_loader = DataLoader(mnist_train, batch_size=config.batch_size, shuffle=True)
+    elif config.network == 'cyclegan':
+        train_dataset = CycleGANDataset(
+            root='../../../datas/cyclegan/vangogh2photo',
+            train=True,
+            transform=get_transform(config)
+        )
+
+    else:
+        train_dataset = datasets.MNIST(
+            root='../../../datas/mnist',
+            train=True,
+            transform=get_transform(config),
+            download=True
+        )
+
+    train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True)
 
     return train_loader
 
 
 def get_test_loader(config):
-    mnist_test = datasets.MNIST(
-        root='../../../datas/mnist',
-        train=False,
-        transform=transforms,
-        download=True
-    )
+    if config.network == 'pix2pix':
+        test_dataset = Pix2PixDataset(
+            root='../../../datas/pix2pix/cityscapes',
+            train=False,
+            transform=get_transform(config)
+        )
 
-    test_loader = DataLoader(mnist_test, batch_size=config.batch_size, shuffle=False)
+    elif config.network == 'cyclegan':
+        test_dataset = CycleGANDataset(
+            root='../../../datas/cyclegan/vangogh2photo',
+            train=False,
+            transform=get_transform(config)
+        )
+
+    else:
+        test_dataset = datasets.MNIST(
+            root='../../../datas/mnist',
+            train=False,
+            transform=get_transform(config),
+            download=True
+        )
+
+    test_loader = DataLoader(test_dataset, batch_size=config.num_samples, shuffle=False)
 
     return test_loader

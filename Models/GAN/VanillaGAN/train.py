@@ -57,7 +57,7 @@ def train_step(model, config, train_info, criterion, optimizer):
 
         # step1: train discriminator
         for _ in range(config.d_step):
-            discriminator.zero_grad()
+            optimizer_discriminator.zero_grad()
 
             real_data = image.view(batch_size, -1)
 
@@ -78,7 +78,7 @@ def train_step(model, config, train_info, criterion, optimizer):
 
         # step2: train generator
         for _ in range(config.g_step):
-            generator.zero_grad()
+            optimizer_generator.zero_grad()
 
             fake_data = generator(torch.randn(batch_size, config.latent_dim, device=config.device))
 

@@ -20,6 +20,7 @@ def show_img(images, cols=4):
 
     # plot every generated image
     for image, axis in zip(images, axes):
+        image = (image * 255).astype(np.uint8)
         axis.imshow(image)
         # eliminate axis
         axis.get_xaxis().set_visible(False)

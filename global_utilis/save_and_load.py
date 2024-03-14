@@ -12,10 +12,19 @@ def save_model(config, model, network=None):
         network = config.network
 
     if isinstance(model, tuple):
-        state_dict = {
-            'generator_state_dict': model[0].state_dict(),
-            'discriminator_state_dict': model[1].state_dict()
-        }
+        if config.network == 'cyclegan':
+            state_dict = {
+                'G_A2B_state_dict': model[0].state_dict(),
+                'G_B2A_state_dict': model[1].state_dict(),
+                'D_A_state_dict': model[2].state_dict(),
+                'D_B_state_dict': model[3].state_dict()
+            }
+        else:
+            state_dict = {
+                'generator_state_dict': model[0].state_dict(),
+                'discriminator_state_dict': model[1].state_dict()
+            }
+
     else:
         state_dict = {
             'model_state_dict': model.state_dict(),
@@ -26,15 +35,31 @@ def save_model(config, model, network=None):
     print("Model Saved.")
 
 
-def load_weight(config, model, network=None):
+def load_weight(config, model, network=None, **kwargs):
     if network is None:
         network = config.network
 
     model_path = save_dir + network + ".pth"
 
-    if isinstance(model, tuple):
-        model[0].load_state_dict(torch.load(model_path)['generator_state_dict'])
-        model[1].load_state_dict(torch.load(model_path)['discriminator_state_dict'])
+    if 'gan' in network or network == 'pix2pix':
+        load_discriminator = kwargs.get('load_discriminator', False)
+
+        if config.network == 'cyclegan':
+            model[0].load_state_dict(torch.load(model_path)['G_A2B_state_dict'])
+            model[1].load_state_dict(torch.load(model_path)['G_B2A_state_dict'])
+        else:
+            if isinstance(model, tuple):
+                model[0].load_state_dict(torch.load(model_path)['generator_state_dict'])
+            else:
+                model.load_state_dict(torch.load(model_path)['generator_state_dict'])
+
+        if load_discriminator:
+            if config.network == 'cyclegan':
+                assert len(model) == 4, "model should contain 4 modules for cyclegan"
+                model[2].load_state_dict(torch.load(model_path)['D_A_state_dict'])
+                model[3].load_state_dict(torch.load(model_path)['D_B_state_dict'])
+            else:
+                model[1].load_state_dict(torch.load(model_path)['discriminator_state_dict'])
 
     else:
         model.load_state_dict(torch.load(model_path)['model_state_dict'])

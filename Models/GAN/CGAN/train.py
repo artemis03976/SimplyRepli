@@ -63,7 +63,7 @@ def train_step(model, config, train_info, criterion, optimizer):
 
         # step1: train discriminator
         for _ in range(config.d_step):
-            discriminator.zero_grad()
+            optimizer_discriminator.zero_grad()
 
             real_data = image.view(batch_size, -1) if 'linear' in config.network else image
 
@@ -88,7 +88,7 @@ def train_step(model, config, train_info, criterion, optimizer):
 
         # step2: train generator
         for _ in range(config.g_step):
-            generator.zero_grad()
+            optimizer_generator.zero_grad()
 
             z_img = torch.randn(batch_size, latent_dim, device=config.device)
             z_label = torch.randint(0, config.num_classes, (batch_size,), device=config.device)

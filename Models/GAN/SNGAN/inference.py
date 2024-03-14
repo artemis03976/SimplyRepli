@@ -1,13 +1,11 @@
 import torch
-from model import Generator, Discriminator
+from model import Generator
 from config.config import SNGANConfig
 from global_utilis import save_and_load, plot
 
 
-def inference(config, model):
-    generator, discriminator = model
+def inference(config, generator):
     generator.eval()
-    discriminator.eval()
 
     with torch.no_grad():
         generation = generator(torch.randn(config.num_samples, config.latent_dim, device=config.device))
@@ -26,18 +24,12 @@ def main():
         config.latent_dim,
         config.feature_size,
         config.G_mid_channels,
-        config.out_channel,
+        config.channel,
     ).to(config.device)
 
-    discriminator = Discriminator(
-        config.in_channel,
-        config.D_mid_channels,
-        config.feature_size,
-    ).to(config.device)
+    save_and_load.load_weight(config, generator)
 
-    save_and_load.load_weight(config, (generator, discriminator))
-
-    inference(config, (generator, discriminator))
+    inference(config, generator)
 
 
 if __name__ == '__main__':

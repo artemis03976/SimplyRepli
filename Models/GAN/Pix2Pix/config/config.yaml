@@ -1,0 +1,23 @@
+project_name: pix2pix
+
+model:
+  num_blocks_g: 1
+  num_layers_d: 3
+  base_channel: 64
+  ch_mult: [1, 2, 4, 8]
+  l1_lambda: 100
+  channel: 3
+  network: pix2pix
+
+train:
+  generator_lr: 0.0002
+  discriminator_lr: 0.0002
+  epochs: 30
+  batch_size: 4
+  d_step: 1
+  g_step: 1
+
+inference:
+  num_samples: 4
+
+device: cuda

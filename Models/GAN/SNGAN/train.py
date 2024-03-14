@@ -57,7 +57,7 @@ def train_step(model, config, train_info, criterion, optimizer):
 
         # step1: train discriminator
         for _ in range(config.d_step):
-            discriminator.zero_grad()
+            optimizer_discriminator.zero_grad()
 
             real_data = image
 
@@ -78,7 +78,7 @@ def train_step(model, config, train_info, criterion, optimizer):
 
         # step2: train generator
         for _ in range(config.g_step):
-            generator.zero_grad()
+            optimizer_generator.zero_grad()
 
             fake_data = generator(torch.randn(batch_size, config.latent_dim, device=config.device))
 
@@ -103,15 +103,17 @@ def main():
     config_path = "config/config.yaml"
     config = SNGANConfig(config_path)
 
+    in_channel = out_channel = config.channel
+
     generator = Generator(
         config.latent_dim,
         config.feature_size,
         config.G_mid_channels,
-        config.out_channel,
+        out_channel,
     ).to(config.device)
 
     discriminator = Discriminator(
-        config.in_channel,
+        in_channel,
         config.D_mid_channels,
         config.feature_size,
     ).to(config.device)
