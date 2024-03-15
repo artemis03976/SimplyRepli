@@ -1,0 +1,26 @@
+project_name: acgan
+
+model:
+  latent_dim: 100
+  proj_dim: 384
+  base_channel: 16
+  G_num_layers: 4
+  D_num_layers: 6
+  dropout: 0.5
+  img_size: 32
+  channel: 1
+  num_classes: 10
+  network: acgan
+
+train:
+  generator_lr: 0.0002
+  discriminator_lr: 0.0002
+  epochs: 30
+  batch_size: 64
+  d_step: 1
+  g_step: 1
+
+inference:
+  num_samples: 64
+
+device: cuda
