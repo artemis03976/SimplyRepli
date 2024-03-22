@@ -4,9 +4,17 @@ from Models.GAN.utilis.dataset import Pix2PixDataset, CycleGANDataset
 
 
 def get_transform(config):
-    if config.channel == 1:
-        transform = transforms.Compose([
+    if not hasattr(config, 'channel') or config.channel == 1:
+        if config.network == 'infogan':
+            transform = transforms.Compose([
+                transforms.Resize(28),
+                transforms.CenterCrop(28),
+                transforms.ToTensor(),
+            ])
+        else:
+            transform = transforms.Compose([
                 transforms.Resize(32),
+                transforms.CenterCrop(32),
                 transforms.ToTensor(),
                 transforms.Normalize([0.5], [0.5]),
             ])

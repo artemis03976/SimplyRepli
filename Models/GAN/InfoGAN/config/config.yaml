@@ -1,0 +1,27 @@
+project_name: infogan
+
+model:
+  latent_noise_dim: 62
+  latent_discrete_dim: 10
+  num_latent_discrete: 1
+  latent_continuous_dim: 2
+  base_channel: 64
+  num_layers: 2
+  lambda_discrete: 1
+  lambda_continuous: 0.1
+  channel: 1
+  feature_size: 7
+  network: infogan
+
+train:
+  generator_lr: 0.001
+  discriminator_lr: 0.0002
+  epochs: 50
+  batch_size: 64
+  d_step: 1
+  g_step: 1
+
+inference:
+  num_samples: 100
+
+device: cuda

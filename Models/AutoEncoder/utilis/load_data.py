@@ -3,6 +3,8 @@ from torchvision import transforms, datasets
 
 
 transforms = transforms.Compose([
+        transforms.Resize(32),
+        transforms.CenterCrop(32),
         transforms.ToTensor(),
     ])
 
