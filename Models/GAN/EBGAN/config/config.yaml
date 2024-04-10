@@ -1,0 +1,23 @@
+project_name: ebgan
+
+model:
+  G_mid_channels: [256, 128, 64]
+  D_mid_channels: [64, 128, 256]
+  latent_dim: 100
+  channel: 1
+  margin: 10
+  lambda_pt: 0.1
+  network: ebgan
+
+train:
+  generator_lr: 0.001
+  discriminator_lr: 0.001
+  epochs: 15
+  batch_size: 128
+  d_step: 1
+  g_step: 1
+
+inference:
+  num_samples: 64
+
+device: cuda
