@@ -14,6 +14,8 @@ def show_img(images, cols=4):
     # create subplot frame
     fig, axes = plt.subplots(rows, cols, figsize=(cols, rows))
 
+    if rows * cols == 1:
+        axes = np.array([axes])
     axes = axes.flatten()
     # adjust image
     images = np.transpose(images, [0, 2, 3, 1])

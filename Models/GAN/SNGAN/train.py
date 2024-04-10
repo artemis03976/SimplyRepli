@@ -10,9 +10,12 @@ from global_utilis import save_and_load
 
 def train(config, model, train_loader):
     generator, discriminator = model
+
     criterion = nn.BCEWithLogitsLoss()
+
     optimizer_generator = optim.Adam(generator.parameters(), lr=config.generator_lr)
     optimizer_discriminator = optim.Adam(discriminator.parameters(), lr=config.discriminator_lr)
+
     num_epochs = config.epochs
 
     print("Start training...")
@@ -26,9 +29,9 @@ def train(config, model, train_loader):
                                 (optimizer_generator, optimizer_discriminator))
 
         print(
-            '\nEpoch [{}/{}], Generator Loss: {:.4f}, Discriminator Fake Loss: {:.4f}, Discriminator Real Loss: {:.4f}'
+            '\nEpoch [{}/{}], Generator Loss: {:.4f}, Discriminator Loss: {:.4f}'
             .format(
-                epoch + 1, num_epochs, total_loss[0], total_loss[1], total_loss[2]
+                epoch + 1, num_epochs, total_loss[0], total_loss[1]
             )
         )
 
@@ -45,8 +48,7 @@ def train_step(model, config, train_info, criterion, optimizer):
     optimizer_generator, optimizer_discriminator = optimizer
 
     total_loss_g = 0.0
-    total_loss_d_fake = 0.0
-    total_loss_d_real = 0.0
+    total_loss_d = 0.0
 
     for batch_idx, (image, _) in enumerate(train_info):
         batch_size = image.shape[0]
@@ -65,16 +67,16 @@ def train_step(model, config, train_info, criterion, optimizer):
 
             output_real = discriminator(real_data)
             loss_real = criterion(output_real, real_labels)
-            loss_real.backward()
 
             output_fake = discriminator(fake_data.detach())
             loss_fake = criterion(output_fake, fake_labels)
-            loss_fake.backward()
+
+            loss_discriminator = loss_real + loss_fake
+            loss_discriminator.backward()
 
             optimizer_discriminator.step()
 
-            total_loss_d_fake += loss_fake.item()
-            total_loss_d_real += loss_real.item()
+            total_loss_d += loss_discriminator.item()
 
         # step2: train generator
         for _ in range(config.g_step):
@@ -90,12 +92,11 @@ def train_step(model, config, train_info, criterion, optimizer):
 
             total_loss_g += loss_generator.item()
 
-        train_info.set_postfix(loss_d_fake=loss_fake.item(), loss_d_real=loss_real.item(), loss_g=loss_generator.item())
+        train_info.set_postfix(loss_d=loss_discriminator.item(), loss_g=loss_generator.item())
 
     return (
         total_loss_g / (len(train_info) * config.g_step),
-        total_loss_d_fake / (len(train_info) * config.d_step),
-        total_loss_d_real / (len(train_info) * config.d_step)
+        total_loss_d / (len(train_info) * config.d_step),
     )
 
 
@@ -117,8 +118,6 @@ def main():
         config.D_mid_channels,
         config.feature_size,
     ).to(config.device)
-
-    print(generator, discriminator)
 
     train_loader = load_data.get_train_loader(config)
 

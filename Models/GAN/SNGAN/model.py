@@ -31,7 +31,8 @@ class Generator(nn.Module):
             )
         )
 
-    def make_layer(self, in_channel, out_channel):
+    @staticmethod
+    def make_layer(in_channel, out_channel):
         return nn.Sequential(
             nn.ConvTranspose2d(in_channel, out_channel, kernel_size=4, stride=2, padding=1),
             nn.BatchNorm2d(out_channel),
@@ -81,7 +82,8 @@ class Discriminator(nn.Module):
             SpectralNorm(nn.Linear(self.feature_size * self.feature_size * mid_channels[-1], 1)),
         )
 
-    def make_layer(self, in_channel, out_channel):
+    @staticmethod
+    def make_layer(in_channel, out_channel):
         return nn.Sequential(
             SpectralNorm(nn.Conv2d(in_channel, out_channel, kernel_size=3, stride=1, padding=1)),
             nn.LeakyReLU(0.1),
