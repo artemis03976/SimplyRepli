@@ -1,0 +1,28 @@
+project_name: wgan-div
+
+model:
+  G_mid_channels: [256, 128, 64]
+  D_mid_channels: [64, 128, 256]
+  latent_dim: 100
+  k: 2
+  p: 6
+  network: wgan-div
+
+dataset:
+  name: mnist
+  channel: 1
+  img_size: 28
+
+train:
+  generator_lr: 0.0002
+  discriminator_lr: 0.0002
+  grad_penalty_weight: 10
+  epochs: 10
+  batch_size: 64
+  d_step: 5
+  g_step: 1
+
+inference:
+  num_samples: 64
+
+device: cuda
