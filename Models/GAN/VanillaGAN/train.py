@@ -10,9 +10,12 @@ from global_utilis import save_and_load
 
 def train(config, model, train_loader):
     generator, discriminator = model
+
     criterion = nn.BCELoss()
+
     optimizer_generator = optim.Adam(generator.parameters(), lr=config.generator_lr)
     optimizer_discriminator = optim.Adam(discriminator.parameters(), lr=config.discriminator_lr)
+
     num_epochs = config.epochs
 
     print("Start training...")
@@ -103,14 +106,16 @@ def main():
     config_path = "config/config.yaml"
     config = GANConfig(config_path)
 
+    input_dim = output_dim = config.img_size * config.img_size
+
     generator = Generator(
         config.latent_dim,
         config.G_hidden_dims,
-        config.output_dim,
+        output_dim,
     ).to(config.device)
 
     discriminator = Discriminator(
-        config.input_dim,
+        input_dim,
         config.D_hidden_dims,
     ).to(config.device)
 

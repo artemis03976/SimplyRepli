@@ -121,6 +121,7 @@ def main():
         config.latent_dim,
         config.G_mid_channels,
         in_channel,
+        config.img_size,
     ).to(config.device)
 
     discriminator = Discriminator(

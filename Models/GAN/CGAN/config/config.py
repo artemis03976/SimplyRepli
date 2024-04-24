@@ -7,20 +7,20 @@ class CGANConfig:
 
         self.project_name = self.config['project_name']
 
-        self.input_dim = self.config['model']['linear']['input_dim']
-        self.output_dim = self.config['model']['linear']['output_dim']
         self.latent_dim_linear = self.config['model']['linear']['latent_dim_linear']
         self.G_hidden_dims = self.config['model']['linear']['G_hidden_dims']
         self.D_hidden_dims = self.config['model']['linear']['D_hidden_dims']
 
-        self.in_channel = self.config['model']['conv']['in_channel']
-        self.out_channel = self.config['model']['conv']['out_channel']
         self.G_mid_channels = self.config['model']['conv']['G_mid_channels']
         self.D_mid_channels = self.config['model']['conv']['D_mid_channels']
         self.latent_dim_conv = self.config['model']['conv']['latent_dim_conv']
 
-        self.num_classes = self.config['model']['num_classes']
         self.proj_dim = self.config['model']['proj_dim']
+
+        self.dataset = self.config['dataset']['name']
+        self.channel = self.config['dataset']['channel']
+        self.img_size = self.config['dataset']['img_size']
+        self.num_classes = self.config['dataset']['num_classes']
 
         self.network = self.config['model']['network']
 

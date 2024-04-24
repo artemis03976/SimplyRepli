@@ -7,17 +7,24 @@ class Generator(nn.Module):
             latent_dim,
             mid_channels,
             out_channel,
+            img_size,
     ):
         super(Generator, self).__init__()
 
         self.generator = nn.ModuleList([
-            self.make_layer(latent_dim, mid_channels[0], kernel_size=4, stride=1, padding=0)
+            self.make_layer(latent_dim, mid_channels[0], kernel_size=3, stride=1, padding=0) if img_size == 28
+            else self.make_layer(latent_dim, mid_channels[0], kernel_size=4, stride=1, padding=0),
         ])
 
         for i in range(len(mid_channels) - 1):
-            self.generator.append(
-                self.make_layer(mid_channels[i], mid_channels[i + 1], kernel_size=4, stride=2, padding=1)
-            )
+            if i == 0 and img_size == 28:
+                self.generator.append(
+                    self.make_layer(mid_channels[i], mid_channels[i + 1], kernel_size=3, stride=2, padding=0)
+                )
+            else:
+                self.generator.append(
+                    self.make_layer(mid_channels[i], mid_channels[i + 1], kernel_size=4, stride=2, padding=1)
+                )
 
         self.generator.append(
             nn.Sequential(

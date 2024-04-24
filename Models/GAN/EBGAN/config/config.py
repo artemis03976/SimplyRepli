@@ -14,7 +14,9 @@ class EBGANConfig:
         self.margin = self.config['model']['margin']
         self.lambda_pt = self.config['model']['lambda_pt']
 
-        self.channel = self.config['model']['channel']
+        self.dataset = self.config['dataset']['name']
+        self.channel = self.config['dataset']['channel']
+        self.img_size = self.config['dataset']['img_size']
 
         self.network = self.config['model']['network']
 

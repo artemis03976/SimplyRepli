@@ -3,14 +3,17 @@ import torch.optim as optim
 from tqdm import tqdm
 from model import Generator, Discriminator
 from config.config import WGANGPConfig
-from Models.GAN.utilis import load_data, gradient_penalty
+from modules import gradient_penalty
+from Models.GAN.utilis import load_data
 from global_utilis import save_and_load
 
 
 def train(config, model, train_loader):
     generator, discriminator = model
+
     optimizer_generator = optim.Adam(generator.parameters(), lr=config.generator_lr, betas=(0.5, 0.9))
     optimizer_discriminator = optim.Adam(discriminator.parameters(), lr=config.discriminator_lr, betas=(0.5, 0.9))
+
     num_epochs = config.epochs
 
     print("Start training...")
@@ -98,15 +101,19 @@ def main():
     config_path = "config/config.yaml"
     config = WGANGPConfig(config_path)
 
+    in_channel = out_channel = config.channel
+
     generator = Generator(
         config.latent_dim,
         config.G_mid_channels,
-        config.out_channel,
+        out_channel,
+        config.img_size,
     ).to(config.device)
 
     discriminator = Discriminator(
-        config.in_channel,
+        in_channel,
         config.D_mid_channels,
+        config.img_size,
     ).to(config.device)
 
     train_loader = load_data.get_train_loader(config)

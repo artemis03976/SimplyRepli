@@ -7,10 +7,13 @@ model:
   G_num_layers: 4
   D_num_layers: 6
   dropout: 0.5
-  img_size: 32
+  network: acgan
+
+dataset:
+  name: mnist
+  img_size: 28
   channel: 1
   num_classes: 10
-  network: acgan
 
 train:
   generator_lr: 0.0002

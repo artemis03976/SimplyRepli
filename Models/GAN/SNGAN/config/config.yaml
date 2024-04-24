@@ -4,9 +4,12 @@ model:
   G_mid_channels: [512, 256, 128, 64]
   D_mid_channels: [64, 128, 256, 512]
   latent_dim: 128
-  channel: 1
-  feature_size: 4
   network: sngan
+
+dataset:
+  name: mnist
+  channel: 1
+  img_size: 28
 
 train:
   generator_lr: 0.0002

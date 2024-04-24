@@ -10,10 +10,6 @@ class Generator(nn.Module):
     ):
         super(Generator, self).__init__()
 
-        self.latent_dim = latent_dim
-        self.hidden_dims = hidden_dims
-        self.output_dim = output_dim
-
         self.generator = nn.ModuleList([
             nn.Sequential(
                 nn.Linear(latent_dim, hidden_dims[0]),
@@ -49,9 +45,6 @@ class Discriminator(nn.Module):
             hidden_dims,
     ):
         super(Discriminator, self).__init__()
-
-        self.input_dim = input_dim
-        self.hidden_dims = hidden_dims
 
         self.discriminator = nn.ModuleList([
             nn.Sequential(

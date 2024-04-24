@@ -108,15 +108,15 @@ def main():
 
     generator = Generator(
         config.latent_dim,
-        config.feature_size,
         config.G_mid_channels,
         out_channel,
+        config.img_size
     ).to(config.device)
 
     discriminator = Discriminator(
         in_channel,
         config.D_mid_channels,
-        config.feature_size,
+        config.img_size,
     ).to(config.device)
 
     train_loader = load_data.get_train_loader(config)

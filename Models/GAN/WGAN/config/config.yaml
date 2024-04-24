@@ -1,12 +1,15 @@
 project_name: wgan
 
 model:
-  in_channel: 1
   G_mid_channels: [256, 128, 64]
   D_mid_channels: [64, 128, 256]
   latent_dim: 100
-  out_channel: 1
   network: wgan
+
+dataset:
+  name: mnist
+  channel: 1
+  img_size: 28
 
 train:
   generator_lr: 0.00005

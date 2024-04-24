@@ -12,9 +12,12 @@ from global_utilis import save_and_load
 
 def train(config, model, train_loader):
     generator, discriminator = model
+
     criterion = nn.BCELoss()
+
     optimizer_generator = optim.Adam(generator.parameters(), lr=config.generator_lr)
     optimizer_discriminator = optim.Adam(discriminator.parameters(), lr=config.discriminator_lr)
+
     num_epochs = config.epochs
 
     print("Start training...")
@@ -118,35 +121,41 @@ def main():
     config = CGANConfig(config_path)
 
     if config.network == 'cgan_linear':
+        input_dim = output_dim = config.img_size * config.img_size
+
         generator = LinearGenerator(
             config.latent_dim_linear,
             config.G_hidden_dims,
-            config.output_dim,
+            output_dim,
             config.num_classes,
             config.proj_dim,
         ).to(config.device)
 
         discriminator = LinearDiscriminator(
-            config.input_dim,
+            input_dim,
             config.D_hidden_dims,
             config.num_classes,
             config.proj_dim,
         ).to(config.device)
 
     elif config.network == 'cgan_conv':
+        in_channel = out_channel = config.channel
+
         generator = ConvGenerator(
             config.latent_dim_conv,
             config.G_mid_channels,
-            config.out_channel,
+            out_channel,
             config.num_classes,
             config.proj_dim,
+            config.img_size
         ).to(config.device)
 
         discriminator = ConvDiscriminator(
-            config.in_channel,
+            in_channel,
             config.D_mid_channels,
             config.num_classes,
             config.proj_dim,
+            config.img_size
         ).to(config.device)
 
     else:

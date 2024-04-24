@@ -17,7 +17,7 @@ def inference(config, generator):
         generation = generator(torch.cat([z_img, z_label], dim=1))
         out = 0.5 * (generation + 1)
         out = out.clamp(0, 1)
-        out = out.view(-1, 1, 32, 32)
+        out = out.view(config.num_samples, config.channel, config.img_size, config.img_size)
 
     plot.show_img(out, cols=8)
 
@@ -31,6 +31,7 @@ def main():
         config.proj_dim,
         config.G_num_layers,
         config.channel,
+        config.img_size
     ).to(config.device)
 
     save_and_load.load_weight(config, generator)

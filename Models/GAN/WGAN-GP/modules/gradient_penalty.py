@@ -19,6 +19,6 @@ def get_gradient_penalty(critic, real_data, fake_data, device):
 
     gradients = gradients.view(gradients.size(0), -1)
 
-    grad_penalty = torch.mean((gradients.norm(2, dim=1) - 1) ** 2)
+    grad_penalty = torch.mean((torch.linalg.norm(gradients, dim=1) - 1) ** 2)
 
     return grad_penalty

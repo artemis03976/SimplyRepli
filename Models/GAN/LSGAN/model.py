@@ -7,17 +7,24 @@ class Generator(nn.Module):
             latent_dim,
             mid_channels,
             out_channel,
+            img_size,
     ):
         super(Generator, self).__init__()
 
         self.generator = nn.ModuleList([
-            self.make_layer(latent_dim, mid_channels[0], kernel_size=4, stride=1, padding=0)
+            self.make_layer(latent_dim, mid_channels[0], kernel_size=3, stride=1, padding=0) if img_size == 28
+            else self.make_layer(latent_dim, mid_channels[0], kernel_size=4, stride=1, padding=0),
         ])
 
         for i in range(len(mid_channels) - 1):
-            self.generator.append(
-                self.make_layer(mid_channels[i], mid_channels[i + 1], kernel_size=4, stride=2, padding=1)
-            )
+            if i == 0 and img_size == 28:
+                self.generator.append(
+                    self.make_layer(mid_channels[i], mid_channels[i + 1], kernel_size=3, stride=2, padding=0)
+                )
+            else:
+                self.generator.append(
+                    self.make_layer(mid_channels[i], mid_channels[i + 1], kernel_size=4, stride=2, padding=1)
+                )
 
         self.generator.append(
             nn.Sequential(
@@ -26,9 +33,10 @@ class Generator(nn.Module):
             )
         )
 
-    def make_layer(self, in_channel, out_channel, kernel_size=4, stride=1, padding=0):
+    @staticmethod
+    def make_layer(in_channel, out_channel, **kwargs):
         return nn.Sequential(
-            nn.ConvTranspose2d(in_channel, out_channel, kernel_size=kernel_size, stride=stride, padding=padding),
+            nn.ConvTranspose2d(in_channel, out_channel, **kwargs),
             nn.BatchNorm2d(out_channel),
             nn.ReLU(),
         )
@@ -52,7 +60,7 @@ class Discriminator(nn.Module):
     ):
         super(Discriminator, self).__init__()
 
-        self.img_size = img_size
+        self.feature_size = img_size // 2 ** (len(mid_channels))
 
         self.discriminator = nn.ModuleList([
             nn.Sequential(
@@ -60,24 +68,23 @@ class Discriminator(nn.Module):
                 nn.LeakyReLU(0.2),
             ),
         ])
-        self.img_size = self.img_size // 2
 
         for i in range(len(mid_channels) - 1):
             self.discriminator.append(
                 self.make_layer(mid_channels[i], mid_channels[i + 1], kernel_size=4, stride=2, padding=1)
             )
-            self.img_size = self.img_size // 2
 
         self.discriminator.append(
             nn.Sequential(
                 nn.Flatten(),
-                nn.Linear(mid_channels[-1] * self.img_size * self.img_size, 1),
+                nn.Linear(mid_channels[-1] * self.feature_size * self.feature_size, 1, bias=False),
             )
         )
 
-    def make_layer(self, in_channel, out_channel, kernel_size=4, stride=1, padding=0):
+    @staticmethod
+    def make_layer(in_channel, out_channel, **kwargs):
         return nn.Sequential(
-            nn.Conv2d(in_channel, out_channel, kernel_size=kernel_size, stride=stride, padding=padding),
+            nn.Conv2d(in_channel, out_channel, **kwargs),
             nn.BatchNorm2d(out_channel),
             nn.LeakyReLU(0.2),
         )

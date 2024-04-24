@@ -14,9 +14,10 @@ class ACGANConfig:
         self.D_num_layers = self.config['model']['D_num_layers']
         self.dropout = self.config['model']['dropout']
 
-        self.img_size = self.config['model']['img_size']
-        self.channel = self.config['model']['channel']
-        self.num_classes = self.config['model']['num_classes']
+        self.dataset = self.config['dataset']['name']
+        self.img_size = self.config['dataset']['img_size']
+        self.channel = self.config['dataset']['channel']
+        self.num_classes = self.config['dataset']['num_classes']
 
         self.network = self.config['model']['network']
 

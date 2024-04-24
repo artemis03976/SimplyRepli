@@ -7,11 +7,13 @@ class GANConfig:
 
         self.project_name = self.config['project_name']
 
-        self.input_dim = self.config['model']['input_dim']
-        self.output_dim = self.config['model']['output_dim']
         self.latent_dim = self.config['model']['latent_dim']
         self.G_hidden_dims = self.config['model']['G_hidden_dims']
         self.D_hidden_dims = self.config['model']['D_hidden_dims']
+
+        self.dataset = self.config['dataset']['name']
+        self.channel = self.config['dataset']['channel']
+        self.img_size = self.config['dataset']['img_size']
 
         self.network = self.config['model']['network']
 

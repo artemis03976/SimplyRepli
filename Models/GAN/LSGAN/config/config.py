@@ -7,13 +7,13 @@ class LSGANConfig:
 
         self.project_name = self.config['project_name']
 
-        self.in_channel = self.config['model']['in_channel']
-        self.out_channel = self.config['model']['out_channel']
         self.G_mid_channels = self.config['model']['G_mid_channels']
         self.D_mid_channels = self.config['model']['D_mid_channels']
         self.latent_dim = self.config['model']['latent_dim']
 
-        self.img_size = self.config['model']['img_size']
+        self.dataset = self.config['dataset']['name']
+        self.channel = self.config['dataset']['channel']
+        self.img_size = self.config['dataset']['img_size']
 
         self.network = self.config['model']['network']
 

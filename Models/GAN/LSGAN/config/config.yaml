@@ -1,18 +1,20 @@
 project_name: lsgan
 
 model:
-  in_channel: 1
   G_mid_channels: [256, 128, 64]
   D_mid_channels: [64, 128, 256]
   latent_dim: 100
-  out_channel: 1
-  img_size: 32
   network: lsgan
+
+dataset:
+  name: mnist
+  channel: 1
+  img_size: 28
 
 train:
   generator_lr: 0.0002
   discriminator_lr: 0.0002
-  epochs: 30
+  epochs: 20
   batch_size: 64
   d_step: 1
   g_step: 1

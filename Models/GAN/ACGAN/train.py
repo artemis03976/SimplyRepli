@@ -132,15 +132,18 @@ def main():
     config_path = "config/config.yaml"
     config = ACGANConfig(config_path)
 
+    out_channel = in_channel = config.channel
+
     generator = Generator(
         config.latent_dim + config.num_classes,
         config.proj_dim,
         config.G_num_layers,
-        config.channel,
+        out_channel,
+        config.img_size
     ).to(config.device)
 
     discriminator = Discriminator(
-        config.channel,
+        in_channel,
         config.D_num_layers,
         config.dropout,
         config.img_size,
