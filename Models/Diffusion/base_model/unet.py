@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from Models.Diffusion.DDPM.modules.time_embedding import TimeEmbedding
-from Models.Diffusion.DDPM.modules.attention_block import AttentionBlock
+from Models.Diffusion.base_model.time_embedding import TimeEmbedding
+from Models.Diffusion.base_model.attention_block import AttentionBlock
 
 
 class ResBlock(nn.Module):
