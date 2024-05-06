@@ -1,10 +1,14 @@
 project_name: googlenet
 
 model:
-  num_classes: 100
   dropout: 0.5
   network: googlenet
+
+dataset:
+  name: cifar100
   img_size: 224
+  channel: 3
+  num_classes: 100
 
 train:
   learning_rate: 0.001

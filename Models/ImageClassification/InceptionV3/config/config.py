@@ -7,10 +7,13 @@ class InceptionConfig:
 
         self.project_name = self.config['project_name']
 
-        self.num_classes = self.config['model']['num_classes']
         self.dropout = self.config['model']['dropout']
         self.network = self.config['model']['network']
-        self.img_size = self.config['model']['img_size']
+
+        self.dataset = self.config['dataset']['name']
+        self.img_size = self.config['dataset']['img_size']
+        self.channel = self.config['dataset']['channel']
+        self.num_classes = self.config['dataset']['num_classes']
 
         self.batch_size = self.config['train']['batch_size']
         self.epochs = self.config['train']['epochs']

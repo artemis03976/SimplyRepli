@@ -1,10 +1,14 @@
 project_name: inception_v3
 
 model:
-  num_classes: 100
   dropout: 0.5
   network: inception_v3
+
+dataset:
+  name: cifar100
   img_size: 299
+  channel: 3
+  num_classes: 100
 
 train:
   learning_rate: 0.001

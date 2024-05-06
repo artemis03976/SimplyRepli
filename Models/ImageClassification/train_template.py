@@ -52,7 +52,7 @@ def train_step(model, config, train_info, criterion, optimizer):
 
         prediction = model(image)
 
-        # special branch for Inception V3
+        # special branch for Inception network
         if config.network == 'inception_v3':
             loss_main = criterion(prediction['main'], label)
             loss_aux = criterion(prediction['aux'], label)
