@@ -1,6 +1,6 @@
 import torch.nn as nn
 import torch.optim as optim
-
+from tqdm import tqdm
 from global_utilis import save_and_load
 from Models.AutoEncoder.utilis import load_data
 from config.config import AEConfig
@@ -16,28 +16,43 @@ def train(config, model, train_loader):
     print("Start training...")
 
     for epoch in range(num_epochs):
-        total_loss = 0.0
-        for batch_idx, (data, _) in enumerate(train_loader):
-            data = data.to(config.device)
+        # set progress bar
+        train_info = tqdm(train_loader, unit="batch")
+        train_info.set_description(f"Epoch {epoch + 1}/{num_epochs}")
 
-            # forward propagation
-            x_decoded = model(data)
+        total_loss = train_step(model, config, train_info, criterion, optimizer)
 
-            # compute loss
-            loss = criterion(x_decoded, data)
-
-            # back propagation
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-
-            total_loss += loss.item()
-
-        print('Epoch [{}/{}], Loss: {:.4f}'.format(epoch + 1, num_epochs, total_loss / len(train_loader)))
+        print(
+            'Epoch [{}/{}], Loss: {:.4f}'
+            .format(epoch + 1, num_epochs, total_loss)
+        )
 
     print("Finish training...")
 
     save_and_load.save_model(config, model)
+
+
+def train_step(model, config, train_info, criterion, optimizer):
+    total_loss = 0.0
+    for batch_idx, (data, _) in enumerate(train_info):
+        data = data.to(config.device)
+
+        # forward propagation
+        x_decoded = model(data)
+
+        # compute loss
+        loss = criterion(x_decoded, data)
+
+        # back propagation
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+        total_loss += loss.item()
+
+        train_info.set_postfix(loss=loss.item())
+
+    return total_loss / len(train_info)
 
 
 def main():

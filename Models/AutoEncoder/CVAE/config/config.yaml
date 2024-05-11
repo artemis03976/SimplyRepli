@@ -8,10 +8,13 @@ model:
     mid_channels: [16, 32, 64]
     latent_dim_conv: 10
     kernel_size: 3
+  network: cvae_conv
+
+dataset:
+  name: mnist
   img_size: 28
   channel: 1
   num_classes: 10
-  network: cvae_conv
 
 train:
   learning_rate: 0.001

@@ -41,6 +41,3 @@ class VisionTransformer(nn.Module):
         x = self.classifier(x[:, 0, :])
 
         return x
-
-
-

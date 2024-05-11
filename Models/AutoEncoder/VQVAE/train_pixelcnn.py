@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-
+from tqdm import tqdm
 from global_utilis import save_and_load
 from Models.AutoEncoder.utilis import load_data
 from config.config import VQVAEConfig
@@ -17,29 +17,44 @@ def train(config, model, prior, train_loader):
     print("Start training...")
 
     for epoch in range(num_epochs):
-        total_loss = 0.0
-        for batch_idx, (image, _) in enumerate(train_loader):
-            with torch.no_grad():
-                image = image.to(config.device)
-                latent = model.encoder(image)
-                latent = model.quantizer.quantize(latent).detach()
+        # set progress bar
+        train_info = tqdm(train_loader, unit="batch")
+        train_info.set_description(f"Epoch {epoch + 1}/{num_epochs}")
 
-            logits = prior(latent)
-            logits = logits.permute(0, 2, 3, 1).contiguous()
+        total_loss = train_step(model, prior, config, train_info, criterion, optimizer)
 
-            loss = criterion(logits.view(-1, config.num_embeddings), latent.view(-1))
-
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-
-            total_loss += loss.item()
-
-        print('Epoch [{}/{}], Loss: {:.4f}'.format(epoch + 1, num_epochs, total_loss / len(train_loader)))
+        print(
+            'Epoch [{}/{}], Loss: {:.4f}'
+            .format(epoch + 1, num_epochs, total_loss)
+        )
 
     print("Finish training...")
 
     save_and_load.save_model(config, prior, network=config.prior_network)
+
+
+def train_step(model, prior, config, train_info, criterion, optimizer):
+    total_loss = 0.0
+    for batch_idx, (image, _) in enumerate(train_info):
+        with torch.no_grad():
+            image = image.to(config.device)
+            latent = model.encoder(image)
+            latent = model.quantizer.quantize(latent).detach()
+
+        logits = prior(latent)
+        logits = logits.permute(0, 2, 3, 1).contiguous()
+
+        loss = criterion(logits.view(-1, config.num_embeddings), latent.view(-1))
+
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+        total_loss += loss.item()
+
+        train_info.set_postfix(loss=loss.item())
+
+    return total_loss / len(train_info)
 
 
 def main():

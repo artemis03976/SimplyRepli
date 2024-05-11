@@ -5,15 +5,18 @@ model:
   embed_dim: 256
   num_res_blocks: 2
   beta: 0.25
-  img_size: 28
   feature_size: 7
-  channel: 1
   network: vqvae
 
 prior:
   mid_channel: 128
   num_res_blocks_prior: 15
   network: pixelcnn
+
+dataset:
+  name: mnist
+  img_size: 28
+  channel: 1
 
 train:
   model:

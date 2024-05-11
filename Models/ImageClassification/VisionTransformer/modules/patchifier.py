@@ -31,9 +31,3 @@ class PatchEmbedding(nn.Module):
         x = self.dropout(x)
 
         return x
-
-
-
-
-
-

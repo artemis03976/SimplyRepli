@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
-
+from tqdm import tqdm
 from Models.AutoEncoder.utilis import load_data
 from global_utilis import save_and_load
 from config.config import CVAEConfig
@@ -18,34 +18,49 @@ def train(config, model, train_loader):
     print("Start training...")
 
     for epoch in range(num_epochs):
-        total_loss = 0.0
-        for batch_idx, (data, label) in enumerate(train_loader):
-            data = data.to(config.device)
-            label = label.to(config.device)
-            label = F.one_hot(label, config.num_classes)
+        # set progress bar
+        train_info = tqdm(train_loader, unit="batch")
+        train_info.set_description(f"Epoch {epoch + 1}/{num_epochs}")
 
-            # forward propagation
-            x_decoded, mu, log_var = model(data, label)
+        total_loss = train_step(model, config, train_info, criterion, optimizer)
 
-            # compute reconstruction loss
-            reconstruction_loss = criterion(x_decoded, data)
-            # compute KL divergence
-            kl_divergence = -0.5 * torch.sum(1 + log_var - mu.pow(2) - log_var.exp())
-            # add loss together
-            loss = reconstruction_loss + kl_divergence
-
-            # back propagation
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-
-            total_loss += loss.item()
-
-        print('Epoch [{}/{}], Loss: {:.4f}'.format(epoch + 1, num_epochs, total_loss / len(train_loader)))
+        print(
+            'Epoch [{}/{}], Loss: {:.4f}'
+            .format(epoch + 1, num_epochs, total_loss)
+        )
 
     print("Finish training...")
 
     save_and_load.save_model(config, model)
+
+
+def train_step(model, config, train_info, criterion, optimizer):
+    total_loss = 0.0
+    for batch_idx, (data, label) in enumerate(train_info):
+        data = data.to(config.device)
+        label = label.to(config.device)
+        label = F.one_hot(label, config.num_classes)
+
+        # forward propagation
+        x_decoded, mu, log_var = model(data, label)
+
+        # compute reconstruction loss
+        reconstruction_loss = criterion(x_decoded, data)
+        # compute KL divergence
+        kl_divergence = -0.5 * torch.sum(1 + log_var - mu.pow(2) - log_var.exp())
+        # add loss together
+        loss = reconstruction_loss + kl_divergence
+
+        # back propagation
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+        total_loss += loss.item()
+
+        train_info.set_postfix(loss=loss.item())
+
+    return total_loss / len(train_info)
 
 
 def main():

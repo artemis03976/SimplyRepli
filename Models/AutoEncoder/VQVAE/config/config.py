@@ -11,16 +11,17 @@ class VQVAEConfig:
         self.embed_dim = self.config['model']['embed_dim']
         self.num_res_blocks = self.config['model']['num_res_blocks']
         self.beta = self.config['model']['beta']
-
-        self.img_size = self.config['model']['img_size']
         self.feature_size = self.config['model']['feature_size']
-        self.channel = self.config['model']['channel']
+
+        self.mid_channel = self.config['prior']['mid_channel']
+        self.num_res_blocks_prior = self.config['prior']['num_res_blocks_prior']
 
         self.network = self.config['model']['network']
         self.prior_network = self.config['prior']['network']
 
-        self.mid_channel = self.config['prior']['mid_channel']
-        self.num_res_blocks_prior = self.config['prior']['num_res_blocks_prior']
+        self.dataset = self.config['dataset']['name']
+        self.img_size = self.config['dataset']['img_size']
+        self.channel = self.config['dataset']['channel']
 
         self.model_batch_size = self.config['train']['model']['batch_size']
         self.model_epochs = self.config['train']['model']['epochs']

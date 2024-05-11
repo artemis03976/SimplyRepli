@@ -14,8 +14,9 @@ class VAEConfig:
         self.latent_dim_conv = self.config['model']['conv']['latent_dim_conv']
         self.kernel_size = self.config['model']['conv']['kernel_size']
 
-        self.img_size = self.config['model']['img_size']
-        self.channel = self.config['model']['channel']
+        self.dataset = self.config['dataset']['name']
+        self.img_size = self.config['dataset']['img_size']
+        self.channel = self.config['dataset']['channel']
 
         self.network = self.config['model']['network']
 
