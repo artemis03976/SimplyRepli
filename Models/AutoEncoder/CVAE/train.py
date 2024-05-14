@@ -67,7 +67,7 @@ def main():
     config_path = "config/config.yaml"
     config = CVAEConfig(config_path)
 
-    train_loader = load_data.load_train_data(config.batch_size)
+    train_loader = load_data.get_train_loader(config)
 
     if config.network == 'cvae_linear':
         if isinstance(config.img_size, (tuple, list)):

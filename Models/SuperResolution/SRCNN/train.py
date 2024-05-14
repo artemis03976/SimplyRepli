@@ -2,10 +2,9 @@ import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
 from global_utilis import save_and_load
-from Models.AutoEncoder.utilis import load_data
-from config.config import AEConfig
-from Models.AutoEncoder.AE.models.ae_linear import LinearAE
-from Models.AutoEncoder.AE.models.ae_conv import ConvAE
+from Models.SuperResolution.utilis import load_data
+from config.config import SRCNNConfig
+from model import SRCNN
 
 
 def train(config, model, train_loader):
@@ -34,14 +33,14 @@ def train(config, model, train_loader):
 
 def train_step(model, config, train_info, criterion, optimizer):
     total_loss = 0.0
-    for batch_idx, (data, _) in enumerate(train_info):
-        data = data.to(config.device)
+    for batch_idx, (lr_img, sr_img) in enumerate(train_info):
+        lr_img = lr_img.to(config.device)
+        sr_img = sr_img.to(config.device)
 
-        # forward propagation
-        x_decoded = model(data)
+        recon_sr_img = model(lr_img)
 
         # compute loss
-        loss = criterion(x_decoded, data)
+        loss = criterion(recon_sr_img, sr_img)
 
         # back propagation
         optimizer.zero_grad()
@@ -57,37 +56,13 @@ def train_step(model, config, train_info, criterion, optimizer):
 
 def main():
     config_path = "config/config.yaml"
-    config = AEConfig(config_path)
+    config = SRCNNConfig(config_path)
 
     train_loader = load_data.get_train_loader(config)
 
-    if config.network == 'ae_linear':
-        if isinstance(config.img_size, (tuple, list)):
-            input_dim = output_dim = config.channel * config.img_size[0] * config.img_size[1]
-        else:
-            input_dim = output_dim = config.img_size ** 2
-
-        model = LinearAE(
-            input_dim,
-            config.latent_dim_linear,
-            config.hidden_dims,
-            output_dim,
-        ).to(config.device)
-
-    elif config.network == 'ae_conv':
-        in_channel = out_channel = config.channel
-
-        model = ConvAE(
-            in_channel,
-            config.latent_dim_conv,
-            config.mid_channels,
-            out_channel,
-            config.img_size,
-            config.kernel_size
-        ).to(config.device)
-
-    else:
-        raise NotImplementedError(f"Unsupported network: {config.network}")
+    model = SRCNN(
+        config.channel,
+    ).to(config.device)
 
     train(config, model, train_loader)
 

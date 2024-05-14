@@ -11,7 +11,7 @@ from models.cvae_conv import ConvCVAE
 def reconstruction(config, model):
     print("Start reconstruction...")
 
-    test_loader = load_data.load_test_data(config.num_samples)
+    test_loader = load_data.get_test_loader(config)
     images, labels = next(iter(test_loader))
     plot.show_img(images, cols=8)
 

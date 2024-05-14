@@ -2,34 +2,44 @@ from torch.utils.data import DataLoader
 from torchvision import transforms, datasets
 
 
-transforms = transforms.Compose([
-        transforms.Resize(32),
-        transforms.CenterCrop(32),
+def get_transform(config):
+    transform = transforms.Compose([
+        transforms.Resize(config.img_size),
+        transforms.CenterCrop(config.img_size),
         transforms.ToTensor(),
     ])
 
+    return transform
 
-def load_train_data(batch_size):
-    mnist_train = datasets.MNIST(
+
+def get_train_loader(config):
+    train_dataset = datasets.MNIST(
         root='../../../datas/mnist',
         train=True,
-        transform=transforms,
+        transform=get_transform(config),
         download=True
     )
+    if hasattr(config, 'current_train_target'):
+        if config.current_train_target == 'model':
+            batch_size = config.model_batch_size
+        else:
+            batch_size = config.prior_batch_size
+    else:
+        batch_size = config.batch_size
 
-    train_loader = DataLoader(mnist_train, batch_size=batch_size, shuffle=True)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
     return train_loader
 
 
-def load_test_data(batch_size):
-    mnist_test = datasets.MNIST(
+def get_test_loader(config):
+    test_dataset = datasets.MNIST(
         root='../../../datas/mnist',
         train=False,
-        transform=transforms,
+        transform=get_transform(config),
         download=True
     )
 
-    test_loader = DataLoader(mnist_test, batch_size=batch_size, shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=config.num_samples, shuffle=False)
 
     return test_loader
