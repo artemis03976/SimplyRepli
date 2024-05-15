@@ -5,12 +5,19 @@ from Models.SuperResolution.utilis.dataset import BSDS500Dataset
 
 
 def get_transform(config):
-    input_transform = transforms.Compose([
-        transforms.CenterCrop(config.img_size),
-        transforms.Resize(config.img_size // config.scale_factor),
-        transforms.Resize(config.img_size, interpolation=Image.BICUBIC),  # 双三次插值
-        transforms.ToTensor()
-    ])
+    if config.network == 'srcnn':
+        input_transform = transforms.Compose([
+            transforms.CenterCrop(config.img_size),
+            transforms.Resize(config.img_size // config.scale_factor, interpolation=Image.BICUBIC),
+            transforms.Resize(config.img_size, interpolation=Image.BICUBIC) ,
+            transforms.ToTensor()
+        ])
+    else:
+        input_transform = transforms.Compose([
+            transforms.CenterCrop(config.img_size),
+            transforms.Resize(config.img_size // config.scale_factor, interpolation=Image.BICUBIC),
+            transforms.ToTensor()
+        ])
 
     target_transform = transforms.Compose([
         transforms.CenterCrop(config.img_size),

@@ -5,8 +5,8 @@ import numpy as np
 from torchvision import transforms
 from global_utilis import plot, save_and_load, save_img
 from Models.SuperResolution.utilis import load_data
-from config.config import SRCNNConfig
-from model import SRCNN
+from config.config import ESPCNConfig
+from model import ESPCN
 
 
 def convert_ycbcr_to_rgb(y, cb, cr):
@@ -61,10 +61,11 @@ def inference(config, model):
 
 def main():
     config_path = "config/config.yaml"
-    config = SRCNNConfig(config_path)
+    config = ESPCNConfig(config_path)
 
-    model = SRCNN(
+    model = ESPCN(
         config.channel,
+        config.scale_factor,
     ).to(config.device)
 
     save_and_load.load_weight(config, model)
