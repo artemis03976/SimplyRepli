@@ -5,17 +5,17 @@ from Models.SuperResolution.utilis.dataset import BSDS500Dataset
 
 
 def get_transform(config):
-    if config.network == 'srcnn':
+    if config.network == 'espcn':
         input_transform = transforms.Compose([
             transforms.CenterCrop(config.img_size),
             transforms.Resize(config.img_size // config.scale_factor, interpolation=Image.BICUBIC),
-            transforms.Resize(config.img_size, interpolation=Image.BICUBIC) ,
             transforms.ToTensor()
         ])
     else:
         input_transform = transforms.Compose([
             transforms.CenterCrop(config.img_size),
             transforms.Resize(config.img_size // config.scale_factor, interpolation=Image.BICUBIC),
+            transforms.Resize(config.img_size, interpolation=Image.BICUBIC),
             transforms.ToTensor()
         ])
 
