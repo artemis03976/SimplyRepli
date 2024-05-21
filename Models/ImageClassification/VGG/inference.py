@@ -2,7 +2,7 @@ from config.config import VGGConfig
 from model import VGG
 
 from global_utilis import save_and_load
-from Models.TraditionalCNN.inference_template import *
+from Models.ImageClassification.inference_template import *
 
 
 def main():
@@ -10,6 +10,7 @@ def main():
     config = VGGConfig(config_path)
 
     model = VGG(
+        config.channel,
         config.network,
         config.num_classes,
         config.dropout,

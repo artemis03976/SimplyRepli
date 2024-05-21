@@ -1,7 +1,7 @@
 from config.config import VGGConfig
 from model import VGG
 
-from Models.TraditionalCNN.train_template import *
+from Models.ImageClassification.train_template import *
 
 
 def main():
@@ -9,6 +9,7 @@ def main():
     config = VGGConfig(config_path)
 
     model = VGG(
+        config.channel,
         config.network,
         config.num_classes,
         config.dropout,

@@ -1,10 +1,11 @@
 import torch
-from Models.TraditionalCNN.utilis import load_data
+from Models.ImageClassification.utilis import load_data
 
 
 def inference(config, model):
+    # switch mode
     model.eval()
-
+    # get test data loader
     test_loader = load_data.get_test_loader(config)
 
     total_accuracy = 0.0
@@ -19,6 +20,7 @@ def inference(config, model):
             if config.network in ['inception_v3', 'googlenet']:
                 prediction = prediction[0]
 
+            # calculate accuracy
             total_accuracy += torch.sum(torch.eq(prediction.argmax(dim=1), label)).item()
             num_samples += image.shape[0]
 

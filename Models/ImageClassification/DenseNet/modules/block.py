@@ -38,14 +38,17 @@ class DenseBlock(nn.Module):
     def __init__(self, num_layers, in_channels, growth_rate, dropout):
         super(DenseBlock, self).__init__()
 
-        for i in range(num_layers):
-            layer = DenseLayer(in_channels + i * growth_rate, growth_rate, dropout)
-            self.add_module("denselayer%d" % (i + 1), layer)
+        self.dense_layer = nn.ModuleList([
+            DenseLayer(in_channels + i * growth_rate, growth_rate, dropout) for i in range(num_layers)
+        ])
 
     def forward(self, x):
+        # store all previous features from dense layers
         total_features = [x]
-        for _, layer in self.named_children():
+
+        for layer in self.dense_layer:
             out = layer(total_features)
+            # add new features to the list
             total_features.append(out)
 
         return torch.cat(total_features, dim=1)

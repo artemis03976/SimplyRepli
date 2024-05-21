@@ -1,6 +1,7 @@
 import torch.nn as nn
 
-from Models.TraditionalCNN.DenseNet.modules.block import DenseBlock, TransitionLayer
+from Models.ImageClassification.DenseNet.modules.block import DenseBlock, TransitionLayer
+from Models.ImageClassification.utilis.network import get_network_cfg
 
 
 network_cfg = {
@@ -12,30 +13,25 @@ network_cfg = {
 }
 
 
-def get_network_cfg(network):
-    if network in network_cfg.keys():
-        return network_cfg[network]
-
-    else:
-        raise NotImplementedError('Unsupported model: {}'.format(network))
-
-
 class DenseNet(nn.Module):
     def __init__(
             self,
+            in_channel,
             network,
             num_classes,
             growth_rate,
-            base_channel=64,
-            dropout=0,
+            dropout=0.0,
             init_weights=True,
     ):
         super(DenseNet, self).__init__()
 
-        num_blocks = get_network_cfg(network)
+        # get predefined network architecture
+        num_blocks = get_network_cfg(network_cfg, network)
 
-        self.features = nn.Sequential(
-             nn.Conv2d(3, base_channel, kernel_size=7, stride=2, padding=3, bias=False),
+        base_channel = 64
+
+        self.feature_layer = nn.Sequential(
+             nn.Conv2d(in_channel, base_channel, kernel_size=7, stride=2, padding=3, bias=False),
              nn.BatchNorm2d(base_channel),
              nn.ReLU(),
              nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
@@ -47,6 +43,7 @@ class DenseNet(nn.Module):
             self.mid_blocks.append(DenseBlock(num_blocks[i], base_channel, growth_rate, dropout))
             base_channel += num_blocks[i] * growth_rate
 
+            # reduce channel in transition layer
             if i != len(num_blocks) - 1:
                 self.mid_blocks.append(TransitionLayer(base_channel, base_channel // 2))
                 base_channel = base_channel // 2
@@ -76,7 +73,7 @@ class DenseNet(nn.Module):
                 nn.init.constant_(module.bias, 0)
 
     def forward(self, x):
-        out = self.features(x)
+        out = self.feature_layer(x)
 
         for layer in self.mid_blocks:
             out = layer(out)

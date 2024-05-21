@@ -1,7 +1,7 @@
 from config.config import InceptionConfig
 from model import InceptionV3
 
-from Models.TraditionalCNN.train_template import *
+from Models.ImageClassification.train_template import *
 
 
 def main():
@@ -9,8 +9,9 @@ def main():
     config = InceptionConfig(config_path)
 
     model = InceptionV3(
+        config.channel,
         config.num_classes,
-        dropout=config.dropout,
+        config.dropout,
         with_aux_logits=True,
     ).to(config.device)
 

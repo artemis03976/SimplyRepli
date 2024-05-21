@@ -1,14 +1,15 @@
 import torch.nn as nn
 
-from Models.TraditionalCNN.InceptionV3.modules.basic_conv import BasicConv
-from Models.TraditionalCNN.InceptionV3.modules.inception_block import InceptionA, InceptionB, InceptionC
-from Models.TraditionalCNN.InceptionV3.modules.inception_reduction_block import InceptionReductionA, InceptionReductionB
-from Models.TraditionalCNN.InceptionV3.modules.inception_auxiliary import InceptionAux
+from Models.ImageClassification.InceptionV3.modules.basic_conv import BasicConv
+from Models.ImageClassification.InceptionV3.modules.inception_block import InceptionA, InceptionB, InceptionC
+from Models.ImageClassification.InceptionV3.modules.inception_reduction_block import InceptionReductionA, InceptionReductionB
+from Models.ImageClassification.InceptionV3.modules.inception_auxiliary import InceptionAux
 
 
 class InceptionV3(nn.Module):
     def __init__(
             self,
+            in_channel,
             num_classes,
             dropout=0.5,
             with_aux_logits=True,
@@ -19,7 +20,7 @@ class InceptionV3(nn.Module):
         self.with_aux_logits = with_aux_logits
 
         self.conv_layer_1 = nn.Sequential(
-            BasicConv(3, 32, kernel_size=3, stride=2),
+            BasicConv(in_channel, 32, kernel_size=3, stride=2),
             BasicConv(32, 32, kernel_size=3, stride=1),
             BasicConv(32, 64, kernel_size=3, stride=1, padding=1),
             nn.MaxPool2d(kernel_size=3, stride=2)
@@ -32,17 +33,17 @@ class InceptionV3(nn.Module):
         )
 
         self.inception_1 = nn.Sequential(
-            InceptionA(192, out_channels_pooling=32),
-            InceptionA(256, out_channels_pooling=64),
-            InceptionA(288, out_channels_pooling=64)
+            InceptionA(192, out_channel_pooling=32),
+            InceptionA(256, out_channel_pooling=64),
+            InceptionA(288, out_channel_pooling=64)
         )
 
         self.inception_2 = nn.Sequential(
             InceptionReductionA(288),
-            InceptionB(768, mid_channels=128),
-            InceptionB(768, mid_channels=160),
-            InceptionB(768, mid_channels=160),
-            InceptionB(768, mid_channels=192)
+            InceptionB(768, mid_channel=128),
+            InceptionB(768, mid_channel=160),
+            InceptionB(768, mid_channel=160),
+            InceptionB(768, mid_channel=192)
         )
 
         if with_aux_logits:
@@ -84,6 +85,7 @@ class InceptionV3(nn.Module):
         x = self.inception_1(x)
         x = self.inception_2(x)
 
+        # aux branch
         aux = None
         if self.with_aux_logits and self.training:
             aux = self.aux_logits(x)

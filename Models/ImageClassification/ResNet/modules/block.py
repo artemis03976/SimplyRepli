@@ -25,11 +25,13 @@ class BuildingBlock(nn.Module):
     def forward(self, x):
         identity = x
 
+        # fit the channels after convolution
         if self.downsample is not None:
             identity = self.downsample(x)
 
         x = self.conv_1(x)
         x = self.conv_2(x)
+        # skip connection
         x = F.relu(x + identity)
 
         return x
@@ -64,12 +66,14 @@ class Bottleneck(nn.Module):
     def forward(self, x):
         identity = x
 
+        # fit the channels after convolution
         if self.downsample is not None:
             identity = self.downsample(x)
 
         x = self.conv_1(x)
         x = self.conv_2(x)
         x = self.conv_3(x)
+        # skip connection
         x = F.relu(x + identity)
 
         return x

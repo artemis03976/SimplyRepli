@@ -2,7 +2,7 @@ from config.config import InceptionConfig
 from model import InceptionV3
 
 from global_utilis import save_and_load
-from Models.TraditionalCNN.inference_template import *
+from Models.ImageClassification.inference_template import *
 
 
 def main():
@@ -10,8 +10,9 @@ def main():
     config = InceptionConfig(config_path)
 
     model = InceptionV3(
+        config.channel,
         config.num_classes,
-        dropout=config.dropout,
+        config.dropout,
         with_aux_logits=True,
     ).to(config.device)
 

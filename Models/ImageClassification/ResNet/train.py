@@ -1,7 +1,7 @@
 from config.config import ResNetConfig
 from model import ResNet
 
-from Models.TraditionalCNN.train_template import *
+from Models.ImageClassification.train_template import *
 
 
 def main():
@@ -9,6 +9,7 @@ def main():
     config = ResNetConfig(config_path)
 
     model = ResNet(
+        config.channel,
         config.network,
         config.num_classes,
     ).to(config.device)

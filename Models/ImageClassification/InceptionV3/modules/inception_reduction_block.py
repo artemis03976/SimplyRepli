@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from Models.TraditionalCNN.InceptionV3.modules.basic_conv import BasicConv
+from Models.ImageClassification.InceptionV3.modules.basic_conv import BasicConv
 
 
 class InceptionReductionA(nn.Module):

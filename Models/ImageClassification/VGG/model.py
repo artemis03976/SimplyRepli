@@ -1,29 +1,20 @@
 import torch
 import torch.nn as nn
+from Models.ImageClassification.utilis.network import get_network_cfg
 
 
-def get_network_cfg(network):
-    if network == 'vgg11':
-        num_blocks = [1, 1, 2, 2, 2]
-
-    elif network == 'vgg13':
-        num_blocks = [2, 2, 2, 2, 2]
-
-    elif network == 'vgg16':
-        num_blocks = [2, 2, 3, 3, 3]
-
-    elif network == 'vgg19':
-        num_blocks = [2, 2, 4, 4, 4]
-
-    else:
-        raise NotImplementedError(f'Unsupported model: {network}')
-
-    return num_blocks
+network_cfg = {
+    'vgg11': [1, 1, 2, 2, 2],
+    'vgg13': [2, 2, 2, 2, 2],
+    'vgg16': [2, 2, 3, 3, 3],
+    'vgg19': [2, 2, 4, 4, 4],
+}
 
 
 class VGG(nn.Module):
     def __init__(
             self,
+            in_channel,
             network,
             num_classes,
             dropout,
@@ -31,16 +22,18 @@ class VGG(nn.Module):
     ):
         super(VGG, self).__init__()
 
-        num_blocks = get_network_cfg(network)
+        # get predefined network architecture
+        num_blocks = get_network_cfg(network_cfg, network)
 
         self.feature_layer = nn.ModuleList([])
         base_channel = 64
 
         for i in range(len(num_blocks)):
             if i == 0:
-                self.feature_layer.append(self.make_layer(num_blocks[i], 3, base_channel))
+                self.feature_layer.append(self.make_layer(num_blocks[i], in_channel, base_channel))
             else:
                 self.feature_layer.append(self.make_layer(num_blocks[i], base_channel, min(base_channel * 2, 512)))
+                # restricting max number of channels to 512
                 base_channel = min(512, base_channel * 2)
 
         self.classifier = nn.Sequential(
@@ -69,7 +62,8 @@ class VGG(nn.Module):
                 nn.init.normal_(module.weight, 0, 0.01)
                 nn.init.constant_(module.bias, 0)
 
-    def make_layer(self, num_layers, in_channel, out_channel):
+    @staticmethod
+    def make_layer(num_layers, in_channel, out_channel):
         conv_layer = []
         for _ in range(num_layers):
             conv_layer.append(nn.Conv2d(in_channel, out_channel, kernel_size=3, padding=1))

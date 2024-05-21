@@ -5,31 +5,32 @@ import torch.nn as nn
 class AlexNet(nn.Module):
     def __init__(
             self,
+            in_channel,
             num_classes,
             dropout=0.5,
             init_weights=True,
     ):
         super(AlexNet, self).__init__()
         self.conv_1 = nn.Sequential(
-            nn.Conv2d(in_channels=3, out_channels=96, kernel_size=11, stride=4, padding=2),
+            nn.Conv2d(in_channel, 96, kernel_size=11, stride=4, padding=2),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=3, stride=2),
             # nn.LocalResponseNorm(size=5, k=2)
         )
 
         self.conv_2 = nn.Sequential(
-            nn.Conv2d(in_channels=96, out_channels=256, kernel_size=5, stride=1, padding=2),
+            nn.Conv2d(96, 256, kernel_size=5, stride=1, padding=2),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=3, stride=2),
             # nn.LocalResponseNorm(size=5, k=2)
         )
 
         self.conv_3 = nn.Sequential(
-            nn.Conv2d(in_channels=256, out_channels=384, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(256, 384, kernel_size=3, stride=1, padding=1),
             nn.ReLU(),
-            nn.Conv2d(in_channels=384, out_channels=384, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(384, 384, kernel_size=3, stride=1, padding=1),
             nn.ReLU(),
-            nn.Conv2d(in_channels=384, out_channels=256, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(384, 256, kernel_size=3, stride=1, padding=1),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=3, stride=2)
         )

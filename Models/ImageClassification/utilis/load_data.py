@@ -2,6 +2,9 @@ from torch.utils.data import DataLoader, random_split
 from torchvision import transforms, datasets
 
 
+num_train_samples_ratio = 0.9
+
+
 def get_transforms(config):
     if config.channel == 1:
         mean = [0.5]
@@ -11,6 +14,7 @@ def get_transforms(config):
         std = [0.5, 0.5, 0.5]
 
     transform = {
+        # train dataset with augmentation
         'train': transforms.Compose([
             transforms.Resize(config.img_size),
             transforms.RandomHorizontalFlip(p=0.5),
@@ -31,6 +35,9 @@ def get_transforms(config):
     }
 
     return transform
+
+
+# TODO:custom dataset
 
 
 def get_train_val_loader(config):
@@ -56,7 +63,7 @@ def get_train_val_loader(config):
         raise NotImplementedError('Unsupported dataset: {}'.format(config.dataset))
 
     total_samples = len(dataset)
-    num_train_samples = 45000
+    num_train_samples = int(total_samples * num_train_samples_ratio)
     num_val_samples = total_samples - num_train_samples
     train_dataset, val_dataset = random_split(dataset, [num_train_samples, num_val_samples])
 
@@ -79,7 +86,7 @@ def get_test_loader(config):
             download=True,
         )
     elif config.dataset == 'cifar10':
-        dataset = datasets.CIFAR10(
+        test_data = datasets.CIFAR10(
             root="../../../datas/cifar10",
             train=False,
             transform=get_transforms(config)['test'],

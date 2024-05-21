@@ -2,7 +2,7 @@ from config.config import ResNetConfig
 from model import ResNet
 
 from global_utilis import save_and_load
-from Models.TraditionalCNN.inference_template import *
+from Models.ImageClassification.inference_template import *
 
 
 def main():
@@ -10,6 +10,7 @@ def main():
     config = ResNetConfig(config_path)
 
     model = ResNet(
+        config.channel,
         config.network,
         config.num_classes,
     ).to(config.device)

@@ -1,7 +1,7 @@
 from config.config import AlexNetConfig
 from model import AlexNet
 
-from Models.TraditionalCNN.train_template import *
+from Models.ImageClassification.train_template import *
 
 
 def main():
@@ -9,6 +9,7 @@ def main():
     config = AlexNetConfig(config_path)
 
     model = AlexNet(
+        config.channel,
         config.num_classes,
         config.dropout,
     ).to(config.device)

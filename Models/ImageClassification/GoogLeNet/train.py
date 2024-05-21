@@ -1,7 +1,7 @@
 from config.config import GoogLeNetConfig
 from model import GoogLeNet
 
-from Models.TraditionalCNN.train_template import *
+from Models.ImageClassification.train_template import *
 
 
 def main():
@@ -9,8 +9,9 @@ def main():
     config = GoogLeNetConfig(config_path)
 
     model = GoogLeNet(
+        config.channel,
         config.num_classes,
-        dropout=config.dropout,
+        config.dropout,
         with_aux_logits=True,
     ).to(config.device)
 

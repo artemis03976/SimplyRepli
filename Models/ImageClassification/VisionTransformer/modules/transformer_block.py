@@ -40,13 +40,11 @@ class MultiHeadAttention(nn.Module):
 
         # get self attention
         energy = torch.matmul(query, key.transpose(-1, -2))
-
         attention_weight = torch.softmax(energy / math.sqrt(self.head_dim), dim=-1)
-
-        attention_output = torch.matmul(attention_weight, value)
-
-        attention_output = attention_output.transpose(1, 2).reshape(batch_size, -1, self.embed_dim)
-        output = self.fc_out(attention_output)
+        attention = torch.matmul(attention_weight, value)
+        # reshape to merge multi heads
+        attention = attention.transpose(1, 2).reshape(batch_size, -1, self.embed_dim)
+        output = self.fc_out(attention)
 
         return output, attention_weight
 
@@ -84,11 +82,11 @@ class TransformerBlock(nn.Module):
         self.layer_norm = nn.LayerNorm(embed_dim)
 
     def forward(self, x):
-        # self attention
+        # go through self attention
         key = query = value = x
         attention_output, attention_weight = self.attention(key, query, value)
         output = self.layer_norm(x + attention_output)
-
+        # go through mlp
         mlp_output = self.feed_forward(output)
         output = self.layer_norm(mlp_output + output)
 

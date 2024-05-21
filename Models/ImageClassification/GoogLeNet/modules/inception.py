@@ -5,8 +5,11 @@ import torch.nn as nn
 class Inception(nn.Module):
     def __init__(self, in_channel, channel_1x1, channel_3x3, channel_5x5, pool_proj):
         super(Inception, self).__init__()
+
+        # 1x1 branch
         self.branch_1 = nn.Conv2d(in_channel, channel_1x1, kernel_size=1)
 
+        # 3x3 branch
         self.branch_2 = nn.Sequential(
             nn.Conv2d(in_channel, channel_3x3[0], kernel_size=1),
             nn.ReLU(),
@@ -14,6 +17,7 @@ class Inception(nn.Module):
             nn.ReLU(),
         )
 
+        # 5x5 branch
         self.branch_3 = nn.Sequential(
             nn.Conv2d(in_channel, channel_5x5[0], kernel_size=1),
             nn.ReLU(),
@@ -21,6 +25,7 @@ class Inception(nn.Module):
             nn.ReLU(),
         )
 
+        # pooling branch
         self.branch_4 = nn.Sequential(
             nn.MaxPool2d(kernel_size=3, stride=1, padding=1),
             nn.Conv2d(in_channel, pool_proj, kernel_size=1),
