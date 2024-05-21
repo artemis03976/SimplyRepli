@@ -8,8 +8,10 @@ from model import VQVAE
 
 
 def train(config, model, train_loader):
+    # pre-defined loss function and optimizer
     criterion = nn.MSELoss(reduction='mean')
     optimizer = optim.Adam(model.parameters(), lr=config.model_learning_rate)
+
     num_epochs = config.model_epochs
 
     print("Start training...")
@@ -19,6 +21,7 @@ def train(config, model, train_loader):
         train_info = tqdm(train_loader, unit="batch")
         train_info.set_description(f"Epoch {epoch + 1}/{num_epochs}")
 
+        # main train step
         total_loss = train_step(model, config, train_info, criterion, optimizer)
 
         print(
@@ -37,7 +40,6 @@ def train_step(model, config, train_info, criterion, optimizer):
         batch_size = image.shape[0]
         image = image.to(config.device)
 
-        # forward propagation
         x_recon, embedding_loss, commitment_loss = model(image)
 
         # compute reconstruction loss
@@ -45,13 +47,12 @@ def train_step(model, config, train_info, criterion, optimizer):
         # add loss together
         loss = reconstruction_loss + embedding_loss + config.beta * commitment_loss
 
-        # back propagation
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
         total_loss += loss.item()
-
+        # set progress bar info
         train_info.set_postfix(loss=loss.item())
 
     return total_loss / len(train_info)

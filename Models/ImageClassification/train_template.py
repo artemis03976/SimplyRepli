@@ -33,8 +33,14 @@ def train(config, model):
         # main val step
         total_accuracy = validation(model, config, val_loader)
 
-        print('\nEpoch [{}/{}], Average Loss: {:.4f}'.format(epoch + 1, num_epochs, total_loss / len(train_loader)))
-        print('Validation Accuracy: {:.4f}'.format(total_accuracy))
+        print(
+            '\nEpoch [{}/{}], Average Loss: {:.4f}'
+            .format(epoch + 1, num_epochs, total_loss / len(train_loader))
+        )
+        print(
+            'Validation Accuracy: {:.4f}'
+            .format(total_accuracy)
+        )
 
         # check early stopping condition
         early_stopping(total_accuracy)

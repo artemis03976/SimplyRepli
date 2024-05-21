@@ -79,21 +79,21 @@ def get_train_val_loader(config):
 
 def get_test_loader(config):
     if config.dataset == 'cifar100':
-        test_data = datasets.CIFAR100(
+        dataset = datasets.CIFAR100(
             root="../../../datas/cifar100",
             train=False,
             transform=get_transforms(config)['test'],
             download=True,
         )
     elif config.dataset == 'cifar10':
-        test_data = datasets.CIFAR10(
+        dataset = datasets.CIFAR10(
             root="../../../datas/cifar10",
             train=False,
             transform=get_transforms(config)['test'],
             download=True,
         )
     elif config.dataset == 'mnist':
-        test_data = datasets.MNIST(
+        dataset = datasets.MNIST(
             root="../../../datas/mnist",
             train=False,
             transform=get_transforms(config)['test'],
@@ -102,6 +102,6 @@ def get_test_loader(config):
     else:
         raise NotImplementedError('Unsupported dataset: {}'.format(config.dataset))
 
-    test_loader = DataLoader(test_data, batch_size=config.num_samples, shuffle=False)
+    test_loader = DataLoader(dataset, batch_size=config.num_samples, shuffle=False)
 
     return test_loader

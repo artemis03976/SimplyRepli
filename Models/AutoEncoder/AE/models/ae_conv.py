@@ -2,7 +2,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-# AE encoder in conv
 class Encoder(nn.Module):
     def __init__(self, in_channel, latent_dim, mid_channels, img_size, kernel_size=3):
         super(Encoder, self).__init__()
@@ -24,6 +23,7 @@ class Encoder(nn.Module):
             ]
             self.img_size -= kernel_size // 2
 
+        # projection into linear latent dim
         self.projection = nn.Sequential(
             nn.AdaptiveAvgPool2d((1, 1)),
             nn.Flatten(),
@@ -39,7 +39,6 @@ class Encoder(nn.Module):
         return x
 
 
-# AE decoder in conv
 class Decoder(nn.Module):
     def __init__(self, out_channel, latent_dim, mid_channels, feature_size, kernel_size=3):
         super(Decoder, self).__init__()
@@ -47,6 +46,7 @@ class Decoder(nn.Module):
         self.feature_size = feature_size
         self.mid_channels = mid_channels
 
+        # projection back into conv space
         self.projection = nn.Sequential(
             nn.Linear(latent_dim, mid_channels[-1]),
             nn.Linear(mid_channels[-1], mid_channels[-1] * feature_size * feature_size),
@@ -76,7 +76,6 @@ class Decoder(nn.Module):
         return x
 
 
-# AE in conv
 class ConvAE(nn.Module):
     def __init__(
             self,
@@ -91,10 +90,7 @@ class ConvAE(nn.Module):
 
         self.img_size = img_size
 
-        # AE encoder
         self.encoder = Encoder(in_channel, latent_dim, mid_channels, img_size, kernel_size)
-
-        # AE decoder
         self.decoder = Decoder(out_channel, latent_dim, mid_channels, self.encoder.img_size, kernel_size)
 
     def forward(self, x):
@@ -102,6 +98,7 @@ class ConvAE(nn.Module):
         encoded = self.encoder(x)
         # decode
         decoded = self.decoder(encoded)
+        # keep the same image size as input
         decoded = F.interpolate(decoded, size=self.img_size, mode='bilinear', align_corners=False)
 
         return decoded

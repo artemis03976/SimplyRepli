@@ -8,8 +8,8 @@ class VectorQuantizer(nn.Module):
         super(VectorQuantizer, self).__init__()
 
         self.embed_dim = embed_dim
-        self.num_embeddings = num_embeddings
 
+        # discrete embedding codebook
         self.embedding = nn.Embedding(num_embeddings, embed_dim)
         self.embedding.weight.data.uniform_(-1 / num_embeddings, 1 / num_embeddings)
 

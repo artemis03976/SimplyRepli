@@ -11,25 +11,26 @@ from models.cvae_conv import ConvCVAE
 def reconstruction(config, model):
     print("Start reconstruction...")
 
+    # load test data for reconstruction
     test_loader = load_data.get_test_loader(config)
     images, labels = next(iter(test_loader))
+    # show original images
     plot.show_img(images, cols=8)
 
     with torch.no_grad():
         images = images.to(config.device)
         labels = labels.to(config.device)
+        # one hot encoding for labels
         labels = F.one_hot(labels, config.num_classes)
         reconstruction_images, _, _ = model(images, labels)
 
-        if torch.is_tensor(reconstruction_images):
-            reconstruction_images = reconstruction_images.detach().cpu().numpy()
-
     print("End reconstruction...")
-
+    # show reconstructed images
     plot.show_img(reconstruction_images, cols=8)
 
 
 def generation(config, model):
+    # get latent dim
     latent_dim = config.latent_dim_linear if 'linear' in config.network else config.latent_dim_conv
 
     print("Start generation...")
@@ -40,23 +41,17 @@ def generation(config, model):
         # randomly generate labels
         labels = torch.randint(0, 10, (config.num_samples,)).to(config.device)
         print(labels)
-
+        # one hot encoding for labels
         labels = F.one_hot(labels, config.num_classes).float()
         # decode
         y = model.label_projection(labels)
         samples = model.decoder(latent_z + y)
         # reshape to image size
         if len(samples.shape) != 4:
-            if isinstance(config.img_size, (tuple, list)):
-                samples = samples.view(-1, config.channel, config.img_size[0], config.img_size[1])
-            else:
-                samples = samples.view(-1, config.channel, config.img_size, config.img_size)
-        # change back to numpy array
-        if torch.is_tensor(samples):
-            samples = samples.detach().cpu().numpy()
+            samples = samples.view(-1, config.channel, config.img_size, config.img_size)
 
     print("End generation...")
-
+    # show generated images
     plot.show_img(samples, cols=8)
 
 
@@ -73,6 +68,7 @@ def main():
 
     if config.network == 'cvae_linear':
         if isinstance(config.img_size, (tuple, list)):
+            # get input and output dims
             input_dim = output_dim = config.channel * config.img_size[0] * config.img_size[1]
         else:
             input_dim = output_dim = config.img_size ** 2

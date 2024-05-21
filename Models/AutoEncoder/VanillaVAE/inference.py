@@ -8,44 +8,40 @@ from Models.AutoEncoder.VanillaVAE.models.vae_conv import ConvVAE
 
 
 def generation(config, model):
+    # get latent dim
+    latent_dim = config.latent_dim_linear if 'linear' in config.network else config.latent_dim_conv
+
     print("Start generation...")
 
     with torch.no_grad():
         # sample from standard normal distribution
-        latent_z = torch.randn(config.num_samples, config.latent_dim_linear).to(config.device)
+        latent_z = torch.randn(config.num_samples, latent_dim).to(config.device)
         # decode
         samples = model.decoder(latent_z)
         # reshape to an image size
         if len(samples.shape) != 4:
-            if isinstance(config.img_size, (tuple, list)):
-                samples = samples.view(-1, config.channel, config.img_size[0], config.img_size[1])
-            else:
-                samples = samples.view(-1, config.channel, config.img_size, config.img_size)
-        # change back to numpy array
-        if torch.is_tensor(samples):
-            samples = samples.detach().cpu().numpy()
+            samples = samples.view(-1, config.channel, config.img_size, config.img_size)
 
     print("End generation...")
-
+    # show generated images
     plot.show_img(samples, cols=8)
 
 
 def reconstruction(config, model):
     print("Start reconstruction...")
 
+    # load test data for reconstruction
     test_loader = load_data.get_test_loader(config)
     images, labels = next(iter(test_loader))
+    # show original images
     plot.show_img(images, cols=8)
 
     with torch.no_grad():
         images = images.to(config.device)
         reconstruction_images, _, _ = model(images)
 
-        if torch.is_tensor(reconstruction_images):
-            reconstruction_images = reconstruction_images.detach().cpu().numpy()
-
     print("End reconstruction...")
-
+    # show reconstructed images
     plot.show_img(reconstruction_images, cols=8)
 
 
@@ -61,6 +57,7 @@ def main():
     config = VAEConfig(config_path)
 
     if config.network == 'vae_linear':
+        # get input and output dims
         if isinstance(config.img_size, (tuple, list)):
             input_dim = output_dim = config.channel * config.img_size[0] * config.img_size[1]
         else:

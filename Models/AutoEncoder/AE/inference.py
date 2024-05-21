@@ -1,5 +1,4 @@
 import torch
-
 from global_utilis import plot, save_and_load
 from Models.AutoEncoder.utilis import load_data
 from config.config import AEConfig
@@ -10,19 +9,18 @@ from Models.AutoEncoder.AE.models.ae_conv import ConvAE
 def inference(config, model):
     print("Start reconstruction...")
 
+    # load test data, since AE has no generation ability
     test_loader = load_data.get_test_loader(config)
     images, labels = next(iter(test_loader))
+    # show original images
     plot.show_img(images, cols=8)
 
-    images = images.to(config.device)
-
-    recon_images = model(images)
-
-    if torch.is_tensor(recon_images):
-        recon_images = recon_images.detach().cpu().numpy()
+    with torch.no_grad():
+        images = images.to(config.device)
+        recon_images = model(images)
 
     print("End reconstruction...")
-
+    # show reconstructed images
     plot.show_img(recon_images, cols=8)
 
 
@@ -31,6 +29,7 @@ def main():
     config = AEConfig(config_path)
 
     if config.network == 'ae_linear':
+        # get input and output dims
         if isinstance(config.img_size, (tuple, list)):
             input_dim = output_dim = config.channel * config.img_size[0] * config.img_size[1]
         else:
@@ -44,7 +43,7 @@ def main():
         ).to(config.device)
 
     elif config.network == 'ae_conv':
-        in_channel = out_channel = 1
+        in_channel = out_channel = config.channel
 
         model = ConvAE(
             in_channel,

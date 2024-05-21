@@ -12,9 +12,7 @@ class PixelCNN(nn.Module):
     ):
         super(PixelCNN, self).__init__()
 
-        self.in_channel = in_channel
-        self.out_channel = out_channel
-
+        # map discrete pixels to continuous latent variables
         self.embedding = nn.Embedding(in_channel, mid_channel)
 
         self.mask_conv_A = MaskedConvBlockA(mid_channel, 2 * mid_channel, kernel_size=7, stride=1, padding=3)

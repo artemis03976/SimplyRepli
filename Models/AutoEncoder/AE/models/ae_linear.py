@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 
 
-# AE encoder in linear
 class Encoder(nn.Module):
     def __init__(self, input_dim, latent_dim, hidden_dims):
         super(Encoder, self).__init__()
@@ -26,7 +25,6 @@ class Encoder(nn.Module):
         return self.encoder(x)
 
 
-# AE decoder in linear
 class Decoder(nn.Module):
     def __init__(self, output_dim, latent_dim, hidden_dims):
         super(Decoder, self).__init__()
@@ -53,7 +51,6 @@ class Decoder(nn.Module):
         return self.decoder(x)
 
 
-# AE in linear
 class LinearAE(nn.Module):
     def __init__(
             self,
@@ -64,10 +61,7 @@ class LinearAE(nn.Module):
     ):
         super(LinearAE, self).__init__()
 
-        # AE encoder
         self.encoder = Encoder(input_dim, latent_dim, hidden_dims)
-
-        # AE decoder
         self.decoder = Decoder(output_dim, latent_dim, hidden_dims)
 
     def forward(self, x):

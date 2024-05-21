@@ -9,6 +9,7 @@ from modules.pixelcnn import PixelCNN
 
 
 def inference(config, model, prior, reconstruct=True, generate=True):
+    # switch mode
     model.eval()
     prior.eval()
 
@@ -20,35 +21,38 @@ def inference(config, model, prior, reconstruct=True, generate=True):
 
 def generation(config, model, prior):
     print("Start generation...")
-    shape = (config.feature_size, config.feature_size)
 
-    sample = torch.zeros(config.num_samples, shape[0], shape[1], dtype=torch.int64, device=config.device)
+    # generate samples for pixelcnn
+    sample = torch.zeros(config.num_samples, config.feature_size, config.feature_size, dtype=torch.int64, device=config.device)
 
     with torch.no_grad():
-        for i in range(shape[0]):
-            for j in range(shape[1]):
+        # generate prior pixel by pixel
+        for i in range(config.feature_size):
+            for j in range(config.feature_size):
                 logits = prior(sample)
                 probs = F.softmax(logits[:, :, i, j], dim=-1).data
 
                 pixel = torch.multinomial(probs, 1)
                 pixel = pixel.squeeze(-1)
                 sample[:, i, j] = pixel
-
+        # quantize latent code
         quantized = model.quantizer.embedding(sample)
         quantized = quantized.permute(0, 3, 1, 2).contiguous()
         samples = model.decoder(quantized)
         samples = samples.view(config.num_samples, config.channel, config.img_size, config.img_size)
 
     print("End generation...")
-
+    # show generated images
     plot.show_img(samples, cols=8)
 
 
 def reconstruction(config, model):
     print("Start reconstruction...")
 
+    # load test data for reconstruction
     test_loader = load_data.get_test_loader(config)
     images, labels = next(iter(test_loader))
+    # show original images
     plot.show_img(images, cols=8)
 
     with torch.no_grad():
@@ -56,7 +60,7 @@ def reconstruction(config, model):
         reconstruction_images, _, _ = model(images)
 
     print("End reconstruction...")
-
+    # show reconstructed images
     plot.show_img(reconstruction_images, cols=8)
 
 

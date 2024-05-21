@@ -3,13 +3,13 @@ import torch.nn as nn
 
 
 class MaskConv2d(nn.Conv2d):
-    def __init__(self, in_channel, out_channel, kernel_size, mask_type='A', **kwarg):
+    def __init__(self, in_channel, out_channel, kernel_size, mask_type='A', **kwargs):
         super(MaskConv2d, self).__init__(
-            in_channel, out_channel, kernel_size, **kwarg
+            in_channel, out_channel, kernel_size, **kwargs
         )
 
         self.mask_type = mask_type
-
+        # create different mask for type A and B
         kernel_height, kernel_width = self.weight.size()[2:]
 
         mask = torch.ones(kernel_height, kernel_width)
@@ -17,9 +17,11 @@ class MaskConv2d(nn.Conv2d):
         mask[kernel_height // 2 + 1:] = 0
         mask[kernel_height // 2, kernel_width // 2 + 1:] = 0
 
+        # mask A is zero at center
         if mask_type == 'A':
             mask[kernel_height // 2, kernel_width // 2] = 0
 
+        # reshape mask to fit input shape
         mask = mask.unsqueeze(0).unsqueeze(0).repeat(out_channel, in_channel, 1, 1)
 
         self.register_buffer('mask', mask)
@@ -30,11 +32,11 @@ class MaskConv2d(nn.Conv2d):
 
 
 class MaskedConvBlockA(nn.Module):
-    def __init__(self, in_channel, out_channel, kernel_size, **kwarg):
+    def __init__(self, in_channel, out_channel, kernel_size, **kwargs):
         super(MaskedConvBlockA, self).__init__()
 
         self.conv = nn.Sequential(
-            MaskConv2d(in_channel, out_channel, kernel_size, mask_type='A', **kwarg),
+            MaskConv2d(in_channel, out_channel, kernel_size, mask_type='A', **kwargs),
             nn.BatchNorm2d(out_channel),
         )
 

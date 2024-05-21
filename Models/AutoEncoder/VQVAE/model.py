@@ -91,8 +91,11 @@ class VQVAE(nn.Module):
         self.decoder = Decoder(num_res_blocks, out_channel)
 
     def forward(self, x):
+        # encode
         z_e = self.encoder(x)
+        # quantize
         z_q, embedding_loss, commitment_loss = self.quantizer(z_e)
+        # decode
         x_recon = self.decoder(z_q)
 
         return x_recon, embedding_loss, commitment_loss

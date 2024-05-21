@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 
 
-# VAE encoder in linear
 class Encoder(nn.Module):
     def __init__(self, input_dim, latent_dim, hidden_dims):
         super(Encoder, self).__init__()
@@ -26,7 +25,6 @@ class Encoder(nn.Module):
         return self.encoder(x)
 
 
-# AE decoder in linear
 class Decoder(nn.Module):
     def __init__(self, output_dim, latent_dim, hidden_dims):
         super(Decoder, self).__init__()
@@ -63,10 +61,7 @@ class LinearVAE(nn.Module):
     ):
         super(LinearVAE, self).__init__()
 
-        # VAE encoder
         self.encoder = Encoder(input_dim, latent_dim, hidden_dims)
-
-        # VAE decoder
         self.decoder = Decoder(output_dim, latent_dim, hidden_dims)
 
     def forward(self, x):
@@ -85,7 +80,8 @@ class LinearVAE(nn.Module):
 
         return decoded, mu, log_var
 
-    def reparameterize(self, mu, log_var):
+    @staticmethod
+    def reparameterize(mu, log_var):
         # compute standard deviation
         std = torch.exp(0.5 * log_var)
         # sample from standard normal distribution

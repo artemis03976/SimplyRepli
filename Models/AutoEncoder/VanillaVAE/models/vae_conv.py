@@ -3,7 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-# VAE encoder in conv
 class Encoder(nn.Module):
     def __init__(self, in_channel, latent_dim, mid_channels, img_size, kernel_size=3):
         super(Encoder, self).__init__()
@@ -25,6 +24,7 @@ class Encoder(nn.Module):
             ]
             self.img_size -= kernel_size // 2
 
+        # projection into linear latent dim
         self.projection = nn.Sequential(
             nn.AdaptiveAvgPool2d((1, 1)),
             nn.Flatten(),
@@ -40,7 +40,6 @@ class Encoder(nn.Module):
         return x
 
 
-# VAE decoder in conv
 class Decoder(nn.Module):
     def __init__(self, out_channel, latent_dim, mid_channels, feature_size, kernel_size=3):
         super(Decoder, self).__init__()
@@ -48,6 +47,7 @@ class Decoder(nn.Module):
         self.feature_size = feature_size
         self.mid_channels = mid_channels
 
+        # projection back into conv space
         self.projection = nn.Sequential(
             nn.Linear(latent_dim, mid_channels[-1]),
             nn.Linear(mid_channels[-1], mid_channels[-1] * feature_size * feature_size),
@@ -77,7 +77,6 @@ class Decoder(nn.Module):
         return x
 
 
-# VAE in conv
 class ConvVAE(nn.Module):
     def __init__(
             self,
@@ -92,10 +91,7 @@ class ConvVAE(nn.Module):
 
         self.img_size = img_size
 
-        # VAE encoder
         self.encoder = Encoder(in_channels, latent_dim, mid_channels, img_size, kernel_size)
-
-        # VAE decoder
         self.decoder = Decoder(out_channels, latent_dim, mid_channels, self.encoder.img_size, kernel_size)
 
     def forward(self, x):
@@ -111,7 +107,8 @@ class ConvVAE(nn.Module):
 
         return decoded, mu, log_var
 
-    def reparameterize(self, mu, log_var):
+    @staticmethod
+    def reparameterize(mu, log_var):
         # compute standard deviation
         std = torch.exp(0.5 * log_var)
         # sample from standard normal distribution

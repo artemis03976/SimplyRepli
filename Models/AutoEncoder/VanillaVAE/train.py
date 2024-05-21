@@ -10,8 +10,10 @@ from models.vae_conv import ConvVAE
 
 
 def train(config, model, train_loader):
+    # pre-defined loss function and optimizer
     criterion = nn.MSELoss(reduction='mean')
     optimizer = optim.Adam(model.parameters(), lr=config.learning_rate)
+
     num_epochs = config.epochs
 
     print("Start training...")
@@ -21,6 +23,7 @@ def train(config, model, train_loader):
         train_info = tqdm(train_loader, unit="batch")
         train_info.set_description(f"Epoch {epoch + 1}/{num_epochs}")
 
+        # main train step
         total_loss = train_step(model, config, train_info, criterion, optimizer)
 
         print(
@@ -39,7 +42,6 @@ def train_step(model, config, train_info, criterion, optimizer):
         batch_size = data.shape[0]
         data = data.to(config.device)
 
-        # forward propagation
         x_decoded, mu, log_var = model(data)
 
         # compute reconstruction loss
@@ -49,13 +51,12 @@ def train_step(model, config, train_info, criterion, optimizer):
         # add loss together
         loss = reconstruction_loss + kl_divergence
 
-        # back propagation
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
         total_loss += loss.item()
-
+        # set progress bar info
         train_info.set_postfix(loss=loss.item())
 
     return total_loss / len(train_info)
@@ -68,6 +69,7 @@ def main():
     train_loader = load_data.get_train_loader(config)
 
     if config.network == 'vae_linear':
+        # get input and output dims
         if isinstance(config.img_size, (tuple, list)):
             input_dim = output_dim = config.channel * config.img_size[0] * config.img_size[1]
         else:
