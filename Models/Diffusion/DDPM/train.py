@@ -8,8 +8,8 @@ from model import DDPM
 
 
 def train(config, model, train_loader):
+    # pre-defined loss function and optimizer
     criterion = nn.MSELoss()
-
     optimizer = optim.Adam(model.unet.parameters(), lr=config.learning_rate)
 
     num_epochs = config.epochs
@@ -21,6 +21,7 @@ def train(config, model, train_loader):
         train_info = tqdm(train_loader, unit="batch")
         train_info.set_description(f"Epoch {epoch + 1}/{num_epochs}")
 
+        # main train step
         total_loss = train_step(model, config, train_info, criterion, optimizer)
 
         print(
@@ -37,23 +38,19 @@ def train(config, model, train_loader):
 
 def train_step(model, config, train_info, criterion, optimizer):
     total_loss = 0.0
-
     for batch_idx, (data, _) in enumerate(train_info):
         data = data.to(config.device)
 
-        # forward propagation
         pred_noise, original_noise = model(data)
 
-        # compute loss
         loss = criterion(pred_noise, original_noise)
 
-        # back propagation
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
         total_loss += loss.item()
-
+        # set progress bar info
         train_info.set_postfix(loss=loss.item())
 
     return total_loss / len(train_info)
@@ -62,7 +59,7 @@ def train_step(model, config, train_info, criterion, optimizer):
 def main():
     config_path = "config/config.yaml"
     config = DDPMConfig(config_path)
-
+    # get train data loader
     train_loader = load_data.load_train_data(config)
 
     in_channel = out_channel = config.channel

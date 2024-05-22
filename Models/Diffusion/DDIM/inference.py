@@ -5,13 +5,15 @@ from model import DDIM
 
 
 def inference(config, model):
+    # sample random noise for generation
     noise_sample = torch.randn((config.num_samples, config.channel, config.img_size, config.img_size), device=config.device)
 
     generation = model.inference(noise_sample)
+    # rescale to [0, 1]
     out = 0.5 * (generation + 1)
     out = out.clamp(0, 1)
     out = out.view(config.num_samples, config.channel, config.img_size, config.img_size)
-
+    # show generated images
     plot.show_img(out, cols=4)
 
 

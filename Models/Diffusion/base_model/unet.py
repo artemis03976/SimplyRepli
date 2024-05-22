@@ -27,6 +27,7 @@ class ResBlock(nn.Module):
             nn.Conv2d(out_channel, out_channel, kernel_size=3, stride=1, padding=1),
         )
 
+        # skip connection for different input/output channel
         if in_channel != out_channel:
             self.skip_conn: nn.Module = nn.Conv2d(in_channel, out_channel, kernel_size=1, stride=1)
         else:
@@ -42,6 +43,7 @@ class ResBlock(nn.Module):
     def forward(self, x, time_embed):
         h = self.conv_1(x)
 
+        # apply scale and shift for time embedding
         time_embed = self.time_embed_proj(time_embed)
         scale, shift = time_embed.unsqueeze(-1).unsqueeze(-1).chunk(2, dim=1)
         h = h * (scale + 1) + shift
@@ -147,9 +149,11 @@ class UNet(nn.Module):
     ):
         super().__init__()
 
+        # default setting for ch_mult
         if ch_mult is None:
             ch_mult = [1, 2, 4, 8]
 
+        # default setting for time_embed_channel
         if time_embed_channel is None:
             time_embed_channel = base_channel * 4
 
@@ -164,9 +168,10 @@ class UNet(nn.Module):
 
         channels = [base_channel] + [int(base_channel * mul) for mul in ch_mult]
         inout_channel = list(zip(channels[:-1], channels[1:]))
-
+        # construct mid block
         unet_block = ResBlock(base_channel * ch_mult[-1], base_channel * ch_mult[-1], time_embed_channel)
 
+        # constructing from bottom to top
         for i, (io_channel, mid_channel) in enumerate(reversed(inout_channel)):
             unet_block = UNetBlock(
                 num_res_blocks,

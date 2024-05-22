@@ -26,20 +26,22 @@ class AttentionBlock(nn.Module):
         batch_size, channel, height, width = x.shape
 
         x_reshaped = x.permute(0, 2, 3, 1).view(batch_size, -1, channel)
-
+        # linear projection and extract head dimension
         query = self.proj_query(x_reshaped).view(batch_size, -1, self.num_head, self.head_dim)
         key = self.proj_key(x_reshaped).view(batch_size, -1, self.num_head, self.head_dim)
         value = self.proj_value(x_reshaped).view(batch_size, -1, self.num_head, self.head_dim)
 
+        # transpose to get dimensions [batch_size, num_heads, seq_len, head_dim]
         query = torch.transpose(query, 1, 2)
         key = torch.transpose(key, 1, 2)
         value = torch.transpose(value, 1, 2)
 
+        # get self attention
         energy = torch.matmul(query, key.transpose(-2, -1))
         energy = energy / (math.sqrt(channel))
         attention = F.softmax(energy, dim=-1)
-
         x_weighted = torch.matmul(attention, value)
+        # reshape to merge multi heads
         x_weighted = x_weighted.transpose(1, 2).contiguous().view(batch_size, -1, self.head_dim * self.num_head)
         x_weighted = self.final_proj(x_weighted)
         x_weighted = x_weighted.transpose(1, 2).contiguous().view(batch_size, channel, height, width)
