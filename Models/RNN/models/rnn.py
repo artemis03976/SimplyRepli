@@ -12,6 +12,7 @@ class RNNCell(RNNBaseCell):
         self.hidden_linear = nn.Linear(hidden_dim, hidden_dim, bias=bias)
 
     def forward(self, input_data, hidden_state):
+        # 'None' for cell in RNN
         hidden, cell = hidden_state
         input_proj = self.input_linear(input_data)
         hidden_proj = self.hidden_linear(hidden)
@@ -20,7 +21,6 @@ class RNNCell(RNNBaseCell):
         return new_hidden, cell
 
 
-# RNN network
 class RNN(RNNBase):
     def __init__(
             self,
@@ -34,11 +34,13 @@ class RNN(RNNBase):
     ):
         super(RNN, self).__init__(input_dim, hidden_dim, num_layers, bias, batch_first, dropout, bidirectional)
 
+        # forward layer
         self.cell = nn.Sequential()
         self.cell.add_module('rnnLayer1', RNNCell(input_dim, hidden_dim, bias=bias))
         for i in range(self.num_layers - 1):
             self.cell.add_module('rnnLayer%d' % (i + 2), RNNCell(hidden_dim, hidden_dim, bias=bias))
 
+        # backward layer
         if self.bidirectional:
             self.reversed_cell = nn.Sequential()
             self.reversed_cell.add_module('brnnLayer1', RNNCell(input_dim, hidden_dim, bias=bias))

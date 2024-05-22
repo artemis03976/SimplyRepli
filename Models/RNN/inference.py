@@ -15,8 +15,10 @@ network_mapping = {
 
 
 def inference(config, model, test_loader):
+    # switch mode
     model.eval()
     total_accuracy = 0.0
+    # recounting for mean accuracy
     num_samples = 0
 
     with torch.no_grad():
@@ -26,6 +28,7 @@ def inference(config, model, test_loader):
 
             output = model(text)
 
+            # calculate accuracy
             total_accuracy += torch.sum(torch.eq(output.argmax(dim=1), label)).item()
             num_samples += text.shape[0]
 
@@ -38,8 +41,9 @@ def main():
     config_path = "config/config.yaml"
     config = RNNConfig(config_path)
 
+    # get test data loader and vocab
     vocab, test_loader = load_data.get_test_loader(config)
-
+    # get vocab size for embedding layer
     src_vocab_size = len(vocab)
 
     model = network_mapping[config.network](

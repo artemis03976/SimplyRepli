@@ -62,15 +62,18 @@ def get_train_val_loader(config):
     else:
         raise NotImplementedError('Unsupported dataset: {}'.format(config.dataset))
 
+    # split dataset into train and validation
     total_samples = len(dataset)
     num_train_samples = int(total_samples * num_train_samples_ratio)
     num_val_samples = total_samples - num_train_samples
     train_dataset, val_dataset = random_split(dataset, [num_train_samples, num_val_samples])
 
+    # apply transforms
     data_transforms = get_transforms(config)
     train_dataset.dataset.transform = data_transforms['train']
     val_dataset.dataset.transform = data_transforms['val']
 
+    # create data loader
     train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False)
 

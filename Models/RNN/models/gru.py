@@ -20,17 +20,18 @@ class GRUCell(RNNBaseCell):
         self.hidden_linear_u = nn.Linear(hidden_size, hidden_size, bias=bias)
 
     def forward(self, input_data, hidden_state):
+        # 'None' for cell in GRU
         hidden, cell = hidden_state
+        # gate function
         reset_gate = F.sigmoid(self.reset_gate_w(input_data) + self.reset_gate_u(hidden_state))
         update_gate = F.sigmoid(self.update_gate_w(input_data) + self.update_gate_u(hidden_state))
         new_info = F.tanh(self.hidden_linear_w(input_data) + reset_gate * self.hidden_linear_u(hidden_state))
-
+        # update cell and hidden
         new_hidden = (1 - update_gate) * hidden_state + update_gate * new_info
 
         return new_hidden, cell
 
 
-# GRU network
 class GRU(RNNBase):
     def __init__(
             self,
@@ -44,11 +45,13 @@ class GRU(RNNBase):
     ):
         super(GRU, self).__init__(input_dim, hidden_dim, num_layers, bias, batch_first, dropout, bidirectional)
 
+        # forward layer
         self.cell = nn.Sequential()
         self.cell.add_module('lstmLayer1', GRUCell(input_dim, hidden_dim, bias=bias))
         for i in range(self.num_layers - 1):
             self.cell.add_module('lstmLayer%d' % (i + 2), GRUCell(hidden_dim, hidden_dim, bias=bias))
 
+        # backward layer
         if self.bidirectional:
             self.reversed_cell = nn.Sequential()
             self.reversed_cell.add_module('blstmLayer1', GRUCell(input_dim, hidden_dim, bias=bias))

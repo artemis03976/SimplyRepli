@@ -19,10 +19,13 @@ network_mapping = {
 
 
 def train(config, model, train_loader, val_loader):
+    # pre-defined loss function and optimizer
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=config.learning_rate)
+
     num_epochs = config.epochs
 
+    # initialize early stopping
     early_stopping = EarlyStopping(patience=3, delta=0.001, mode='max')
 
     print("Start training...")
@@ -32,15 +35,22 @@ def train(config, model, train_loader, val_loader):
         train_info = tqdm(train_loader, unit="batch")
         train_info.set_description(f"Epoch {epoch + 1}/{num_epochs}")
 
+        # main train step
         total_loss = train_step(model, config, train_info, criterion, optimizer)
-
+        # main val step
         total_accuracy = validation(model, config, val_loader)
 
+        print(
+            '\nEpoch [{}/{}], Average Loss: {:.4f}'
+            .format(epoch + 1, num_epochs, total_loss / len(train_loader))
+        )
+        print(
+            'Validation Accuracy: {:.4f}'
+            .format(total_accuracy)
+        )
+
+        # check early stopping condition
         early_stopping(total_accuracy)
-
-        print('\nEpoch [{}/{}], Average Loss: {:.4f}'.format(epoch + 1, num_epochs, total_loss / len(train_loader)))
-        print('Validation Accuracy: {:.4f}'.format(total_accuracy))
-
         if early_stopping.early_stop:
             print("Need Early Stopping")
             break
@@ -51,6 +61,7 @@ def train(config, model, train_loader, val_loader):
 
 
 def train_step(model, config, train_info, criterion, optimizer):
+    # switch mode
     model.train()
     total_loss = 0.0
 
@@ -67,15 +78,17 @@ def train_step(model, config, train_info, criterion, optimizer):
         optimizer.step()
 
         total_loss += loss.item()
-
+        # set progress bar info
         train_info.set_postfix(Loss=loss.item())
 
     return total_loss
 
 
 def validation(model, config, val_loader):
+    # switch mode
     model.eval()
     total_accuracy = 0.0
+    # recounting for mean accuracy
     num_samples = 0
 
     with torch.no_grad():
@@ -85,6 +98,7 @@ def validation(model, config, val_loader):
 
             output = model(text)
 
+            # calculate accuracy
             total_accuracy += torch.sum(torch.eq(output.argmax(dim=1), label)).item()
             num_samples += text.shape[0]
 
@@ -95,8 +109,9 @@ def main():
     config_path = "config/config.yaml"
     config = RNNConfig(config_path)
 
+    # get train and val data loader and vocab
     vocab, train_loader, val_loader = load_data.get_train_val_loader(config)
-
+    # get vocab size for embedding layer
     src_vocab_size = len(vocab)
 
     model = network_mapping[config.network](

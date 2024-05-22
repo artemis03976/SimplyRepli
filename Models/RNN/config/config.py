@@ -9,10 +9,12 @@ class RNNConfig:
 
         self.embed_dim = self.config['model']['embed_dim']
         self.hidden_dim = self.config['model']['hidden_dim']
-        self.num_classes = self.config['model']['num_classes']
         self.num_layers = self.config['model']['num_layers']
         self.dropout = self.config['model']['dropout']
         self.bidirectional = self.config['model']['bidirectional']
+
+        self.dataset = self.config['dataset']['name']
+        self.num_classes = self.config['dataset']['num_classes']
 
         self.network = self.config['model']['network']
 

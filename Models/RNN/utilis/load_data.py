@@ -1,36 +1,12 @@
 import torch
-from torch.utils.data import Dataset, TensorDataset, random_split, DataLoader
+from torch.utils.data import TensorDataset, random_split, DataLoader
 from Models.RNN.utilis.preprocess import *
+from Models.RNN.utilis.dataset import IMDBDataset
 import numpy as np
 
 
-MAX_LENGTH = 300
-
-
-class IMDBDataset(Dataset):
-    def __init__(self, root, train=True):
-        if not os.path.exists(os.path.join(root, 'preprocessed')):
-            preprocess(root, train=train)
-
-        if train:
-            data_path = os.path.join(root, 'preprocessed/train.txt')
-        else:
-            data_path = os.path.join(root, 'preprocessed/test.txt')
-
-        vocab_path = os.path.join(root, 'preprocessed/vocab.pkl')
-        with open(vocab_path, 'rb') as f:
-            self.vocab = pickle.load(f)
-
-        with open(data_path, 'r', encoding='utf-8') as f:
-            data = [line.strip() for line in f.readlines()]
-            self.labels = [int(line[0]) for line in data]
-            self.text = [line[2:] for line in data]
-
-    def __len__(self):
-        return len(self.text)
-
-    def __getitem__(self, index):
-        return self.text[index], self.labels[index]
+MAX_LENGTH = 300  # maximum length of a sentence
+num_train_samples_ratio = 0.8
 
 
 def sentence_to_tensor(vocab, sentence, device):
@@ -55,19 +31,23 @@ def labels_to_tensor(labels, device):
 
 def get_train_val_loader(config):
     save_dir = '../../datas/IMDB'
-    data = IMDBDataset(root=save_dir)
+    data = IMDBDataset(root=save_dir, train=True)
 
     vocab = data.vocab
+    # transform original text into tensors
     text_tensor = textlist_to_tensor(vocab, data.text, config.device)
     label_tensor = labels_to_tensor(data.labels, config.device)
 
+    # create tensor dataset
     dataset = TensorDataset(text_tensor, label_tensor)
 
+    # split dataset into train and validation
     total_samples = len(dataset)
-    num_val_samples = 5000
-    num_train_samples = total_samples - num_val_samples
+    num_train_samples = total_samples * num_train_samples_ratio
+    num_val_samples = total_samples - num_train_samples
     train_dataset, val_dataset = random_split(dataset, [num_train_samples, num_val_samples])
 
+    # create data loader
     train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False)
 
@@ -79,9 +59,11 @@ def get_test_loader(config):
     data = IMDBDataset(root=save_dir, train=False)
 
     vocab = data.vocab
+    # transform original text into tensors
     text_tensor = textlist_to_tensor(vocab, data.text, config.device)
     label_tensor = labels_to_tensor(data.labels, config.device)
 
+    # create data loader
     dataset = TensorDataset(text_tensor, label_tensor)
     test_loader = DataLoader(dataset, batch_size=config.batch_size, shuffle=False)
 

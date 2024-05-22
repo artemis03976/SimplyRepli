@@ -24,18 +24,18 @@ class LSTMCell(RNNBaseCell):
 
     def forward(self, input_data, hidden_state):
         hidden, cell = hidden_state
+        # gate function
         input_gate = F.sigmoid(self.input_gate_w(input_data) + self.input_gate_u(hidden))
         output_gate = F.sigmoid(self.output_gate_w(input_data) + self.output_gate_u(hidden))
         forget_gate = F.sigmoid(self.forget_gate_w(input_data) + self.forget_gate_u(hidden))
         new_info = F.tanh(self.hidden_linear_w(input_data) + self.hidden_linear_u(hidden))
-
+        # update cell and hidden
         new_cell = forget_gate * cell + input_gate * new_info
         new_hidden = output_gate * F.tanh(new_cell)
 
         return new_hidden, new_cell
 
 
-# LSTM network
 class LSTM(RNNBase):
     def __init__(
             self,
@@ -49,11 +49,13 @@ class LSTM(RNNBase):
     ):
         super(LSTM, self).__init__(input_dim, hidden_dim, num_layers, bias, batch_first, dropout, bidirectional)
 
+        # forward layer
         self.cell = nn.Sequential()
         self.cell.add_module('lstmLayer1', LSTMCell(input_dim, hidden_dim, bias=bias))
         for i in range(self.num_layers - 1):
             self.cell.add_module('lstmLayer%d' % (i + 2), LSTMCell(hidden_dim, hidden_dim, bias=bias))
 
+        # backward layer
         if self.bidirectional:
             self.reversed_cell = nn.Sequential()
             self.reversed_cell.add_module('blstmLayer1', LSTMCell(input_dim, hidden_dim, bias=bias))
