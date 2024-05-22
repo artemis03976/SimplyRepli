@@ -1,6 +1,5 @@
 import random
 from nltk.translate.bleu_score import sentence_bleu
-
 from global_utilis import save_and_load
 from models.seq2seq import Seq2SeqRNN, Seq2SeqGRU, Seq2SeqLSTM
 from models.seq2seq_attn import Seq2SeqAttnRNN, Seq2SeqAttnGRU, Seq2SeqAttnLSTM
@@ -19,12 +18,11 @@ network_mapping = {
 
 
 def translate(config, model, input_lang, output_lang, test_pair):
-    # switch to evaluation mode
+    # switch mode
     model.eval()
     with torch.no_grad():
         # convert test sentence to tensor
         input_tensor, output_tensor = pair_to_tensor(input_lang, output_lang, test_pair, config.device)
-
         # disable teacher forcing
         decoder_outputs, attentions = model(input_tensor, output_tensor, teacher_forcing_ratio=0)
         # filter to obtain the most likely token
@@ -50,11 +48,11 @@ def translate(config, model, input_lang, output_lang, test_pair):
     return test_pair[1], output_sentence
 
 
-def inference(config, model):
-    input_lang, output_lang, pairs = prepare_data('eng', 'cmn', reverse=True)
+def inference(config, model, input_lang, output_lang):
     bleu = np.zeros(4)
     for _ in range(config.num_samples):
         reference, candidate = translate(config, model, input_lang, output_lang, random.choice(pairs))
+        # calculate bleu score
         bleu += evaluate(reference, candidate)
 
     bleu /= config.num_samples
@@ -67,7 +65,7 @@ def inference(config, model):
 def evaluate(reference, candidate):
     reference = [reference.split(' ')]
     candidate = candidate.split(' ')[:-1]
-
+    # cumulative bleu
     bleu1 = sentence_bleu(reference, candidate, weights=(1, 0, 0, 0))
     bleu2 = sentence_bleu(reference, candidate, weights=(0.5, 0.5, 0, 0))
     bleu3 = sentence_bleu(reference, candidate, weights=(0.33, 0.33, 0.33, 0))
@@ -80,8 +78,8 @@ def main():
     config_path = "config/config.yaml"
     config = Seq2SeqConfig(config_path)
 
-    input_lang, output_lang, train_loader = get_dataloader(config.batch_size, config.device)
-
+    # get test data and vocab
+    input_lang, output_lang, pairs = prepare_data(config.input_lang, config.output_lang, config.reverse)
     src_vocab_size = input_lang.n_words
     tgt_vocab_size = output_lang.n_words
 
@@ -102,7 +100,7 @@ def main():
 
     save_and_load.load_weight(config, model)
 
-    inference(config, model)
+    inference(config, model, input_lang, output_lang)
 
 
 if __name__ == '__main__':

@@ -25,7 +25,9 @@ class DecoderAttnBase(nn.Module):
     def __init__(self, output_dim, embed_dim, hidden_dim, dropout):
         super(DecoderAttnBase, self).__init__()
 
+        # token embedding
         self.embedding = nn.Embedding(output_dim, embed_dim)
+        # simple additive attention
         self.attention = BahdanauAttention(hidden_dim)
         self.out = nn.Linear(hidden_dim, output_dim)
         self.dropout = nn.Dropout(dropout)
@@ -35,10 +37,12 @@ class DecoderAttnBase(nn.Module):
     def forward(self, input_seq, hidden, cell, encoder_outputs):
         embedded = self.dropout(self.embedding(input_seq))
 
+        # get cross attention, meaning query and key coming from different parts
         query = hidden[-1].unsqueeze(1)
         context, attn_weights = self.attention(query, encoder_outputs)
         embedded_attn = torch.cat((embedded, context), dim=2)
 
+        # branch for LSTM
         if cell is not None:
             output, (hidden, cell) = self.network(embedded_attn, (hidden, cell))
         else:

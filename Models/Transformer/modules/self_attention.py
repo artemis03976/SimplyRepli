@@ -12,9 +12,11 @@ class ScaledDotProductAttention(nn.Module):
     def forward(self, key, query, value, mask):
         energy = torch.matmul(query, key.transpose(-1, -2))
 
+        # fill mask
         if mask is not None:
             energy = energy.masked_fill(mask, float("-1e20"))
 
+        # calculate attention with scale
         attention_weight = torch.softmax(energy / math.sqrt(self.head_dim), dim=-1)
 
         output = torch.matmul(attention_weight, value)
@@ -43,26 +45,27 @@ class MultiHeadAttention(nn.Module):
     def forward(self, key, query, value, mask):
         batch_size = key.shape[0]
 
-        # 线性投影
+        # linear projection
         k = self.keys(key)
         q = self.queries(query)
         v = self.values(value)
 
-        # 分离多头
+        # extract head dimension
         k = k.reshape(batch_size, -1, self.num_heads, self.head_dim)
         q = q.reshape(batch_size, -1, self.num_heads, self.head_dim)
         v = v.reshape(batch_size, -1, self.num_heads, self.head_dim)
 
-        # 转置多头
+        # transpose to get dimensions [batch_size, num_heads, seq_len, head_dim]
         k = torch.transpose(k, 1, 2)
         q = torch.transpose(q, 1, 2)
         v = torch.transpose(v, 1, 2)
 
+        # expand mask to fit the shape
         attention_mask = mask.unsqueeze(1).repeat(1, self.num_heads, 1, 1)
 
-        # 自注意力
+        # get self attention
         attention_output, attention_weight = self.self_attention(k, q, v, attention_mask)
-
+        # reshape to merge multi heads
         attention_output = attention_output.transpose(1, 2).reshape(batch_size, -1, self.embed_dim)
         output = self.fc_out(attention_output)
 

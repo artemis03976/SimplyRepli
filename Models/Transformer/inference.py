@@ -5,8 +5,10 @@ from utilis import load_data
 
 
 def inference(config, model, output_lang, val_loader):
+    # switch mode
     model.eval()
 
+    # get test data
     data = next(iter(val_loader))
     input_seq = data[0].to(config.device)
     ground_truth = data[1].to(config.device)
@@ -37,8 +39,8 @@ def main():
     config_path = "config/config.yaml"
     config = TransformerConfig(config_path)
 
+    # get test data and vocab
     input_lang, output_lang, train_loader, val_loader = load_data.get_dataloader(config)
-
     src_vocab_size = input_lang.n_words
     tgt_vocab_size = output_lang.n_words
 

@@ -16,12 +16,12 @@ class TransformerEncoderBlock(nn.Module):
         self.layer_norm = nn.LayerNorm(embed_dim)
 
     def forward(self, input_seq, mask):
-        # Self-attention
+        # self attention
         key = query = value = input_seq
         self_attention_output, self_attention_weight = self.self_attention(key, query, value, mask)
         output = self.layer_norm(input_seq + self_attention_output)
 
-        # Feed forward network
+        # feed forward network
         feed_forward_output = self.feed_forward(output)
         output = self.layer_norm(feed_forward_output + output)
 

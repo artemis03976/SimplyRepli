@@ -12,9 +12,12 @@ class TransformerConfig:
         self.num_layers = self.config['model']['num_layers']
         self.num_heads = self.config['model']['num_heads']
         self.dropout = self.config['model']['dropout']
-        self.lang1 = self.config['model']['lang1']
-        self.lang2 = self.config['model']['lang2']
-        self.reverse = self.config['model']['reverse']
+
+        self.dataset = self.config['dataset']['name']
+        self.input_lang = self.config['dataset']['input_lang']
+        self.output_lang = self.config['dataset']['output_lang']
+        self.reverse = self.config['dataset']['reverse']
+
         self.network = self.config['model']['network']
 
         self.batch_size = self.config['train']['batch_size']

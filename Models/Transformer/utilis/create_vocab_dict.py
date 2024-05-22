@@ -8,7 +8,7 @@ SOS_token = 0
 EOS_token = 1
 PAD_token = 2
 UNK_token = 3
-MAX_LENGTH = 40
+MAX_LENGTH = 40  # maximum length of a sentence
 
 
 class Lang:
@@ -17,7 +17,7 @@ class Lang:
         self.word2index = {}
         self.word2count = {}
         self.index2word = {0: "SOS", 1: "EOS", 2: "PAD"}
-        self.n_words = 3  # Count SOS and EOS
+        self.n_words = 3  # Count SOS, EOS and PAD
 
     def add_sentence(self, sentence):
         # use jieba for Chinese segmentation
@@ -30,6 +30,7 @@ class Lang:
 
     def add_word(self, word):
         if word not in self.word2index:
+            # create entry
             self.word2index[word] = self.n_words
             self.word2count[word] = 1
             self.index2word[self.n_words] = word
@@ -41,11 +42,11 @@ class Lang:
 def read_data(lang1, lang2, reverse=False):
     print("Reading lines...")
 
-    # Read the file and split into lines
+    # read the file and split into lines
     file_path = '../../datas/machine_translation/%s-%s.txt'
     lines = open(file_path % (lang1, lang2), encoding='utf-8').read().strip().split('\n')
 
-    # Split every line into pairs and normalize
+    # split every line into pairs and normalize
     pairs = []
     for line in lines:
         pair = line.split('\t')
@@ -53,7 +54,7 @@ def read_data(lang1, lang2, reverse=False):
         pair[1] = unicode_to_ascii(pair[1].lower().strip())
         pairs.append(pair)
 
-    # Reverse pairs
+    # reverse pairs
     pairs = [list(reversed(p)) for p in pairs] if reverse else pairs
 
     return pairs
@@ -85,6 +86,7 @@ def create_lang_vocab(lang1, lang2, pairs, reverse):
 
 
 def prepare_data(lang1, lang2, reverse=False):
+    # create save directory
     current_directory = os.path.dirname(os.path.abspath(__file__))
     save_dir = '../../../datas/machine_translation/vocab/'
     input_vocab_file = lang2 + '.pkl' if reverse else lang1 + '.pkl'
@@ -95,6 +97,7 @@ def prepare_data(lang1, lang2, reverse=False):
 
     pairs = read_data(lang1, lang2, reverse)
 
+    # read vocab if already exists, else create
     if os.path.exists(input_vocab_path) and os.path.exists(output_vocab_path):
         input_lang = load_vocab(input_vocab_path)
         output_lang = load_vocab(output_vocab_path)

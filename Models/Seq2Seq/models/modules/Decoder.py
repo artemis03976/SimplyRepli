@@ -7,6 +7,7 @@ class DecoderBase(nn.Module):
     def __init__(self, output_dim, embed_dim, hidden_dim, dropout):
         super(DecoderBase, self).__init__()
 
+        # token embedding
         self.embedding = nn.Embedding(output_dim, embed_dim)
         self.out = nn.Linear(hidden_dim, output_dim)
         self.dropout = nn.Dropout(dropout)
@@ -15,6 +16,7 @@ class DecoderBase(nn.Module):
 
     def forward(self, input_seq, hidden, cell):
         embedded = self.dropout(F.relu(self.embedding(input_seq)))
+        # branch for LSTM
         if cell is not None:
             output, (hidden, cell) = self.network(embedded, (hidden, cell))
         else:

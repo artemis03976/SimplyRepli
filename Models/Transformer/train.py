@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
-
 from model import Transformer
 from config.config import TransformerConfig
 from utilis import load_data
@@ -18,10 +17,13 @@ def modify_tgt_seq(tgt_seq):
 
 
 def train(config, model, train_loader, val_loader):
-    criterion = nn.CrossEntropyLoss(ignore_index=load_data.PAD_token)
+    # pre-defined loss function and optimizer
     optimizer = optim.Adam(model.parameters(), lr=config.learning_rate)
-    num_epochs = config.epochs
+    # ignore the padding in the target sequence
+    criterion = nn.CrossEntropyLoss(ignore_index=load_data.PAD_token)
 
+    num_epochs = config.epochs
+    # initialize early stopping
     early_stopping = EarlyStopping(patience=3, delta=0.001, mode='min')
 
     print("Start training...")
@@ -31,15 +33,22 @@ def train(config, model, train_loader, val_loader):
         train_info = tqdm(train_loader, unit="batch")
         train_info.set_description(f"Epoch {epoch + 1}/{num_epochs}")
 
+        # main train step
         total_loss = train_step(model, config, train_info, criterion, optimizer)
-
+        # main val step
         val_loss = validation(model, config, val_loader)
 
+        print(
+            '\nEpoch [{}/{}], Average Loss: {:.4f}'
+            .format(epoch + 1, num_epochs, total_loss)
+        )
+        print(
+            'Validation Loss: {:.4f}'
+            .format(val_loss)
+        )
+
+        # check early stopping condition
         early_stopping(val_loss)
-
-        print('\nEpoch [{}/{}], Average Loss: {:.4f}'.format(epoch + 1, num_epochs, total_loss / len(train_loader)))
-        print('Validation Accuracy: {:.4f}'.format(val_loss))
-
         if early_stopping.early_stop:
             print("Need Early Stopping")
             break
@@ -50,6 +59,7 @@ def train(config, model, train_loader, val_loader):
 
 
 def train_step(model, config, train_info, criterion, optimizer):
+    # switch mode
     model.train()
     total_loss = 0.0
 
@@ -69,15 +79,17 @@ def train_step(model, config, train_info, criterion, optimizer):
         optimizer.step()
 
         total_loss += loss.item()
-
+        # set progress bar info
         train_info.set_postfix(Loss=loss.item())
 
     return total_loss
 
 
 def validation(model, config, val_loader):
+    # switch mode
     model.eval()
     total_loss = 0.0
+    # recounting for mean loss
     num_samples = 0
     criterion = nn.CrossEntropyLoss(ignore_index=load_data.PAD_token)
 
@@ -103,8 +115,8 @@ def main():
     config_path = "config/config.yaml"
     config = TransformerConfig(config_path)
 
+    # get train and val data loader
     input_lang, output_lang, train_loader, val_loader = load_data.get_dataloader(config)
-
     src_vocab_size = input_lang.n_words
     tgt_vocab_size = output_lang.n_words
 

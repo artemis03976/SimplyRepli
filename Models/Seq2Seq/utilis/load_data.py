@@ -1,7 +1,10 @@
 import numpy as np
 import torch
-from torch.utils.data import TensorDataset, DataLoader, RandomSampler
+from torch.utils.data import TensorDataset, DataLoader, random_split
 from Models.Seq2Seq.utilis.create_vocab_dict import *
+
+
+num_train_samples_ratio = 0.8
 
 
 # transform sentence into indexes
@@ -32,20 +35,31 @@ def pair_to_tensor(input_lang, output_lang, pair, device):
     return input_tensor, target_tensor
 
 
-def get_dataloader(batch_size, device):
-    input_lang, output_lang, pairs = prepare_data(lang1='eng', lang2='cmn', reverse=True)
+def get_dataloader(config):
+    input_lang, output_lang, pairs = prepare_data(
+        lang1=config.input_lang,
+        lang2=config.output_lang,
+        reverse=config.reverse
+    )
 
     input_idxes = []
     target_idxes = []
 
     for idx, pair in enumerate(pairs):
-        input_tensor, target_tensor = pair_to_tensor(input_lang, output_lang, pair, device)
+        input_tensor, target_tensor = pair_to_tensor(input_lang, output_lang, pair, config.device)
         input_idxes.append(input_tensor)
         target_idxes.append(target_tensor)
 
-    train_data = TensorDataset(torch.cat(input_idxes, dim=0), torch.cat(target_idxes, dim=0))
+    # create dataset
+    dataset = TensorDataset(torch.cat(input_idxes, dim=0), torch.cat(target_idxes, dim=0))
 
-    train_sampler = RandomSampler(train_data)
-    train_dataloader = DataLoader(train_data, sampler=train_sampler, batch_size=batch_size)
+    # split train and val dataset
+    total_samples = len(dataset)
+    num_train_samples = int(total_samples * num_train_samples_ratio)
+    num_val_samples = total_samples - num_train_samples
+    train_dataset, val_dataset = random_split(dataset, [num_train_samples, num_val_samples])
+    # create dataloader
+    train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=config.batch_size, shuffle=False)
 
-    return input_lang, output_lang, train_dataloader
+    return input_lang, output_lang, train_loader, val_loader

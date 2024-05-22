@@ -15,6 +15,11 @@ class Seq2SeqConfig:
         self.bidirectional = self.config['model']['bidirectional']
         self.network = self.config['model']['network']
 
+        self.dataset = self.config['dataset']['name']
+        self.input_lang = self.config['dataset']['input_lang']
+        self.output_lang = self.config['dataset']['output_lang']
+        self.reverse = self.config['dataset']['reverse']
+
         self.batch_size = self.config['train']['batch_size']
         self.epochs = self.config['train']['epochs']
         self.learning_rate = self.config['train']['learning_rate']

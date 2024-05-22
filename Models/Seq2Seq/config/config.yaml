@@ -9,6 +9,12 @@ model:
   bidirectional: False
   network: gru_attn
 
+dataset:
+  name: machine_translation
+  input_lang: eng
+  output_lang: cmn
+  reverse: True
+
 train:
   learning_rate: 0.001
   epochs: 40

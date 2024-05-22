@@ -17,23 +17,23 @@ class TransformerDecoderBlock(nn.Module):
         self.layer_norm = nn.LayerNorm(embed_dim)
 
     def forward(self, input_seq, encoder_output, cross_mask, tgt_mask):
-        # Self-attention
-        residual = input_seq
+        # self attention
+        identity = input_seq
         key = query = value = input_seq
         output, self_attention_weight = self.self_attention(key, query, value, tgt_mask)
-        output = self.layer_norm(output + residual)
+        output = self.layer_norm(output + identity)
 
-        # Cross-attention
-        residual = output
+        # cross attention
+        identity = output
         key = value = encoder_output
         query = output
         output, cross_attention_weight = self.cross_attention(key, query, value, cross_mask)
-        output = self.layer_norm(output + residual)
+        output = self.layer_norm(output + identity)
 
-        # Feed forward
-        residual = output
+        # feed forward
+        identity = output
         output = self.feed_forward(output)
-        output = self.layer_norm(output + residual)
+        output = self.layer_norm(output + identity)
 
         return output, self_attention_weight, cross_attention_weight
 

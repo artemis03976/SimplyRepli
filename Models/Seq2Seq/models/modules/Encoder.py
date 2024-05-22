@@ -6,6 +6,7 @@ class EncoderBase(nn.Module):
     def __init__(self, input_dim, embed_dim, dropout):
         super(EncoderBase, self).__init__()
 
+        # token embedding
         self.embedding = nn.Embedding(input_dim, embed_dim)
         self.dropout = nn.Dropout(dropout)
 

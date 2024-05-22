@@ -1,7 +1,6 @@
 import torch.nn as nn
 import torch.nn.functional as F
 import random
-
 from Models.Seq2Seq.models.modules.Encoder import EncoderRNN, EncoderGRU, EncoderLSTM
 from Models.Seq2Seq.models.modules.Decoder import DecoderRNN, DecoderGRU, DecoderLSTM
 from Models.Seq2Seq.utilis.load_data import *
@@ -18,12 +17,11 @@ class Seq2SeqBase(nn.Module):
     def forward(self, input_seq, target_seq, teacher_forcing_ratio=0.5):
         batch_size = input_seq.shape[0]
 
-        # initialize the output sequence
         decoder_outputs = []
         # get the decoder input for the first time, which is SOS token, to signal decode
         decoder_input = torch.empty(batch_size, 1, dtype=torch.long).fill_(SOS_token).to(self.device)
 
-        # encode the input sequence
+        # encode
         encoder_output, encoder_hidden, encoder_cell = self.encoder(input_seq)
         # pass the hidden states to the decoder for decoding
         decoder_hidden, decoder_cell = encoder_hidden, encoder_cell
@@ -31,20 +29,18 @@ class Seq2SeqBase(nn.Module):
         for t in range(MAX_LENGTH):
             # decode from target embedding and encoder hidden states
             decoder_output, decoder_hidden, decoder_cell = self.decoder(decoder_input, decoder_hidden, decoder_cell)
-            # holding predictions for each token
             decoder_outputs.append(decoder_output)
 
             # randomly decide using teacher forcing or not
             teacher_forcing = random.random() < teacher_forcing_ratio
 
-            # get the highest predicted token from our predictions
+            # get the highest predicted token
             top_token_val, top_token_idx = decoder_output.topk(1)
 
             # Teacher forcing: use the target token as the next input
             # Without teacher forcing: use its own predictions as the next input
             decoder_input = target_seq[:, t].unsqueeze(1) if teacher_forcing else top_token_idx.squeeze(-1).detach()
 
-        # cat to be a tensor
         decoder_outputs = torch.cat(decoder_outputs, dim=1)
         decoder_outputs = F.log_softmax(decoder_outputs, dim=-1)
 

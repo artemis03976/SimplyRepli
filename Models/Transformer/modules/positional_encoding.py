@@ -10,14 +10,17 @@ class PositionalEncoding(nn.Module):
 
         positional_encoding = torch.zeros(max_len, embed_dim)
         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
+        # use sin and cos embedding
         div_term = torch.exp(torch.arange(0, embed_dim, step=2).float() * (-torch.log(torch.tensor(10000.0)) / embed_dim))
         positional_encoding[:, 0::2] = torch.sin(position * div_term)
         positional_encoding[:, 1::2] = torch.cos(position * div_term)
+        # add dim to the front for batch
         positional_encoding = positional_encoding.unsqueeze(0)
 
         self.register_buffer('positional_encoding', positional_encoding)
 
     def forward(self, embedding):
+        # clip embedding based on the input length
         embedding = embedding + self.positional_encoding[:, :embedding.size(1)]
         embedding = self.dropout(embedding)
         return embedding

@@ -6,10 +6,13 @@ model:
   num_layers: 6
   num_heads: 8
   dropout: 0.1
-  lang1: eng
-  lang2: cmn
-  reverse: True
   network: transformer
+
+dataset:
+  name: machine_translation
+  input_lang: eng
+  output_lang: cmn
+  reverse: True
 
 train:
   learning_rate: 0.0001
