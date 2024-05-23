@@ -42,6 +42,7 @@ class Generator(nn.Module):
         )
 
     def forward(self, x):
+        # protection for incorrect shape
         if len(x.shape) != 4:
             x = x.unsqueeze(-1).unsqueeze(-1)
 
@@ -59,6 +60,7 @@ class Discriminator(nn.Module):
     ):
         super(Discriminator, self).__init__()
 
+        # encoder-decider structure for discriminator
         self.encoder = nn.ModuleList([
             nn.Sequential(
                 nn.Conv2d(in_channel, mid_channels[0], kernel_size=4, stride=2, padding=1),

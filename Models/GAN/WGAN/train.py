@@ -9,7 +9,7 @@ from global_utilis import save_and_load
 
 def train(config, model, train_loader):
     generator, discriminator = model
-
+    # pre-defined optimizer
     optimizer_generator = optim.RMSprop(generator.parameters(), lr=config.generator_lr)
     optimizer_discriminator = optim.RMSprop(discriminator.parameters(), lr=config.discriminator_lr)
 
@@ -22,14 +22,17 @@ def train(config, model, train_loader):
         train_info = tqdm(train_loader, unit="batch")
         train_info.set_description(f"Epoch {epoch + 1}/{num_epochs}")
 
-        total_loss = train_step((generator, discriminator), config, train_info,
-                                (optimizer_generator, optimizer_discriminator))
+        # main train step
+        total_loss = train_step(
+            model,
+            config,
+            train_info,
+            (optimizer_generator, optimizer_discriminator)
+        )
 
         print(
             '\nEpoch [{}/{}], Generator Loss: {:.4f}, Discriminator Loss: {:.4f},'
-            .format(
-                epoch + 1, num_epochs, total_loss[0], total_loss[1]
-            )
+            .format(epoch + 1, num_epochs, total_loss[0], total_loss[1])
         )
 
     print("Finish training...")
@@ -38,10 +41,10 @@ def train(config, model, train_loader):
 
 
 def train_step(model, config, train_info, optimizer):
+    # unpacking
     generator, discriminator = model
     generator.train()
     discriminator.train()
-
     optimizer_generator, optimizer_discriminator = optimizer
 
     total_loss_g = 0.0
@@ -56,13 +59,13 @@ def train_step(model, config, train_info, optimizer):
             optimizer_discriminator.zero_grad()
 
             real_data = image
-
+            # get fake data
             z = torch.randn(batch_size, config.latent_dim, device=config.device)
             fake_data = generator(z)
 
             output_real = discriminator(real_data).view(-1)
             output_fake = discriminator(fake_data.detach()).view(-1)
-
+            # calculate wasserstein loss
             loss_discriminator = -(torch.mean(output_real) - torch.mean(output_fake))
             loss_discriminator.backward()
 
@@ -77,7 +80,9 @@ def train_step(model, config, train_info, optimizer):
         for _ in range(config.g_step):
             optimizer_generator.zero_grad()
 
-            fake_data = generator(torch.randn(batch_size, config.latent_dim, device=config.device))
+            # get fake data
+            z = torch.randn(batch_size, config.latent_dim, device=config.device)
+            fake_data = generator(z)
 
             output_fake = discriminator(fake_data).view(-1)
             loss_generator = -torch.mean(output_fake)
@@ -86,7 +91,7 @@ def train_step(model, config, train_info, optimizer):
             optimizer_generator.step()
 
             total_loss_g += loss_generator.item()
-
+        # set progress bar info
         train_info.set_postfix(loss_d=loss_discriminator.item(), loss_g=loss_generator.item())
 
     return (

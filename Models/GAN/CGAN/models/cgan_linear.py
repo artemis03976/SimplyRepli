@@ -13,12 +13,7 @@ class LinearGenerator(nn.Module):
     ):
         super(LinearGenerator, self).__init__()
 
-        self.latent_dim = latent_dim
-        self.hidden_dims = hidden_dims
-        self.output_dim = output_dim
-        self.num_classes = num_classes
-        self.proj_dim = proj_dim
-
+        # label projection
         self.label_proj = nn.Linear(num_classes, proj_dim)
 
         self.generator = nn.ModuleList([
@@ -44,8 +39,8 @@ class LinearGenerator(nn.Module):
         )
 
     def forward(self, latent, label):
-        # concatenate label embedding and image tensor
         label_embedding = self.label_proj(label)
+        # concatenate label embedding and image tensor
         x = torch.cat([latent, label_embedding], dim=1)
 
         for layer in self.generator:
@@ -64,14 +59,10 @@ class LinearDiscriminator(nn.Module):
     ):
         super(LinearDiscriminator, self).__init__()
 
-        self.input_dim = input_dim
-        self.hidden_dims = hidden_dims
-        self.num_classes = num_classes
-        self.proj_dim = proj_dim
-
+        # label projection
         self.label_proj = nn.Linear(num_classes, proj_dim)
 
-        self.classifier = nn.ModuleList([
+        self.discriminator = nn.ModuleList([
             nn.Sequential(
                 nn.Linear(input_dim + proj_dim, hidden_dims[0]),
                 nn.LeakyReLU(0.2),
@@ -79,14 +70,14 @@ class LinearDiscriminator(nn.Module):
         ])
 
         for i in range(len(hidden_dims) - 1):
-            self.classifier.append(
+            self.discriminator.append(
                 nn.Sequential(
                     nn.Linear(hidden_dims[i], hidden_dims[i + 1]),
                     nn.LeakyReLU(0.2),
                 )
             )
 
-        self.classifier.append(
+        self.discriminator.append(
             nn.Sequential(
                 nn.Linear(hidden_dims[-1], 1),
                 nn.Sigmoid(),
@@ -94,10 +85,10 @@ class LinearDiscriminator(nn.Module):
         )
 
     def forward(self, image, label):
-        # concatenate label embedding and image tensor
         label_embedding = self.label_proj(label)
+        # concatenate label embedding and image tensor
         x = torch.cat([image, label_embedding], dim=1)
 
-        for layer in self.classifier:
+        for layer in self.discriminator:
             x = layer(x)
         return x

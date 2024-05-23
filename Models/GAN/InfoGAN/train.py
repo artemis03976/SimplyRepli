@@ -25,7 +25,7 @@ def sample_noise(batch_size, config):
 
 def train(config, model, train_loader):
     generator, discriminator = model
-
+    # pre-defined loss function and optimizer
     criterion_gan = nn.BCEWithLogitsLoss()
     criterion_discrete = nn.CrossEntropyLoss()
 
@@ -34,7 +34,6 @@ def train(config, model, train_loader):
         lr=config.generator_lr,
         betas=(0.5, 0.999)
     )
-    
     optimizer_discriminator = optim.Adam(
         itertools.chain(discriminator.main.parameters(), discriminator.d_head.parameters()),
         lr=config.discriminator_lr,
@@ -50,8 +49,9 @@ def train(config, model, train_loader):
         train_info = tqdm(train_loader, unit="batch")
         train_info.set_description(f"Epoch {epoch + 1}/{num_epochs}")
 
+        # main train step
         total_loss = train_step(
-            (generator, discriminator),
+            model,
             config,
             train_info,
             (criterion_gan, criterion_discrete),
@@ -71,12 +71,11 @@ def train(config, model, train_loader):
 
 
 def train_step(model, config, train_info, criterion, optimizer):
+    # unpacking
     generator, discriminator = model
     generator.train()
     discriminator.train()
-
     criterion_gan, criterion_discrete = criterion
-
     optimizer_generator, optimizer_discriminator = optimizer
 
     total_loss_g = 0.0
@@ -85,13 +84,12 @@ def train_step(model, config, train_info, criterion, optimizer):
     for batch_idx, (image, _) in enumerate(train_info):
         batch_size = image.shape[0]
         image = image.to(config.device)
-
+        # labels for discriminator
         real_labels = torch.ones(batch_size, 1, device=config.device)
         fake_labels = torch.zeros(batch_size, 1, device=config.device)
 
-        # get real and fake data
         real_data = image
-
+        # get fake data
         latent_noise, latent_discrete, latent_discrete_idx, latent_continuous = sample_noise(batch_size, config)
         latent = torch.cat([latent_noise, latent_discrete, latent_continuous], dim=1)
         fake_data = generator(latent)
@@ -100,10 +98,12 @@ def train_step(model, config, train_info, criterion, optimizer):
         for i in range(config.d_step):
             optimizer_discriminator.zero_grad()
 
+            # calculate loss on real data
             output_real, _ = discriminator(real_data)
             loss_real = criterion_gan(output_real, real_labels)
             loss_real.backward()
 
+            # calculate loss on fake data
             output_fake, _ = discriminator(fake_data.detach())
             loss_fake = criterion_gan(output_fake, fake_labels)
             loss_fake.backward()
@@ -121,6 +121,7 @@ def train_step(model, config, train_info, criterion, optimizer):
             d_output, q_output = discriminator(fake_data)
             loss_gan = criterion_gan(d_output, real_labels)
 
+            # split output of latent code
             q_discrete, q_continuous = torch.split(
                 q_output,
                 [config.num_latent_discrete * config.latent_discrete_dim, config.latent_continuous_dim * 2],
@@ -129,9 +130,9 @@ def train_step(model, config, train_info, criterion, optimizer):
 
             # calculate loss for discrete latent code
             loss_discrete = 0.0
-            for i in range(config.num_latent_discrete):
-                current_latent_d = q_discrete[:, i * config.latent_discrete_dim: (i + 1) * config.latent_discrete_dim]
-                loss_discrete += criterion_discrete(current_latent_d, latent_discrete_idx[:, i])
+            for j in range(config.num_latent_discrete):
+                current_latent_d = q_discrete[:, j * config.latent_discrete_dim: (j + 1) * config.latent_discrete_dim]
+                loss_discrete += criterion_discrete(current_latent_d, latent_discrete_idx[:, j])
 
             # calculate loss for continuous latent code
             q_mu, q_var = q_continuous.chunk(2, dim=1)
@@ -145,7 +146,7 @@ def train_step(model, config, train_info, criterion, optimizer):
             optimizer_generator.step()
 
             total_loss_g += loss_generator.item()
-
+        # set progress bar info
         train_info.set_postfix(loss_d=loss_discriminator.item(), loss_g=loss_generator.item())
 
     return (
@@ -157,7 +158,6 @@ def train_step(model, config, train_info, criterion, optimizer):
 def main():
     config_path = "config/config.yaml"
     config = InfoGANConfig(config_path)
-
 
     generator = Generator(
         config.latent_noise_dim + config.num_latent_discrete * config.latent_discrete_dim + config.latent_continuous_dim,

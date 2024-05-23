@@ -3,53 +3,65 @@ from torchvision import transforms, datasets
 from Models.GAN.utilis.dataset import Pix2PixDataset, CycleGANDataset
 
 
-def get_transform(config):
+def get_transforms(config):
     if not hasattr(config, 'channel') or config.channel == 1:
-        if config.network == 'infogan':
-            transform = transforms.Compose([
-                transforms.Resize(28),
-                transforms.CenterCrop(28),
-                transforms.ToTensor(),
-            ])
-        else:
-            transform = transforms.Compose([
-                transforms.Resize(28),
-                transforms.CenterCrop(28),
-                transforms.ToTensor(),
-                transforms.Normalize([0.5], [0.5]),
-            ])
+        mean = [0.5]
+        std = [0.5]
+    else:
+        mean = [0.5, 0.5, 0.5]
+        std = [0.5, 0.5, 0.5]
+
+    if config.network == 'infogan':
+        transform = transforms.Compose([
+            transforms.Resize(config.img_size),
+            transforms.CenterCrop(config.img_size),
+            transforms.ToTensor(),
+            # weird result if normalize
+        ])
     else:
         transform = transforms.Compose([
-            transforms.Resize((256, 256)),
+            transforms.Resize(config.img_size),
+            transforms.CenterCrop(config.img_size),
             transforms.ToTensor(),
-            transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
+            transforms.Normalize(mean, std),
         ])
 
     return transform
 
 
+def get_dataset(dataset_info, config):
+    if config.dataset == 'mnist' or None:
+        dataset = datasets.MNIST(**dataset_info)
+    elif config.dataset == 'fashion_mnist':
+        dataset = datasets.FashionMNIST(**dataset_info)
+    elif config.dataset == 'cifar10':
+        dataset = datasets.CIFAR10(**dataset_info)
+    elif config.network == 'cyclegan':
+        dataset = CycleGANDataset(**dataset_info)
+    elif config.network == 'pix2pix':
+        dataset = Pix2PixDataset(**dataset_info)
+    else:
+        raise NotImplementedError('Unsupported dataset: {}'.format(config.dataset))
+
+    return dataset
+
+
 def get_train_loader(config):
     if config.network == 'pix2pix':
-        train_dataset = Pix2PixDataset(
-            root='../../../datas/pix2pix/cityscapes',
-            train=True,
-            transform=get_transform(config)
-        )
-
+        root = '../../../datas/pix2pix' + config.dataset
     elif config.network == 'cyclegan':
-        train_dataset = CycleGANDataset(
-            root='../../../datas/cyclegan/vangogh2photo',
-            train=True,
-            transform=get_transform(config)
-        )
-
+        root = '../../../datas/cyclegan' + config.dataset
     else:
-        train_dataset = datasets.MNIST(
-            root='../../../datas/mnist',
-            train=True,
-            transform=get_transform(config),
-            download=True
-        )
+        root = '../../../datas/' + config.dataset
+
+    dataset_info = {
+        'root': root,
+        'train': True,
+        'transform': get_transforms(config),
+        'download': True
+    }
+
+    train_dataset = get_dataset(dataset_info, config)
 
     train_loader = DataLoader(train_dataset, batch_size=config.batch_size, shuffle=True)
 
@@ -58,26 +70,20 @@ def get_train_loader(config):
 
 def get_test_loader(config):
     if config.network == 'pix2pix':
-        test_dataset = Pix2PixDataset(
-            root='../../../datas/pix2pix/cityscapes',
-            train=False,
-            transform=get_transform(config)
-        )
-
+        root = '../../../datas/pix2pix' + config.dataset
     elif config.network == 'cyclegan':
-        test_dataset = CycleGANDataset(
-            root='../../../datas/cyclegan/vangogh2photo',
-            train=False,
-            transform=get_transform(config)
-        )
-
+        root = '../../../datas/cyclegan' + config.dataset
     else:
-        test_dataset = datasets.MNIST(
-            root='../../../datas/mnist',
-            train=False,
-            transform=get_transform(config),
-            download=True
-        )
+        root = '../../../datas/' + config.dataset
+
+    dataset_info = {
+        'root': root,
+        'train': True,
+        'transform': get_transforms(config),
+        'download': True
+    }
+
+    test_dataset = get_dataset(dataset_info, config)
 
     test_loader = DataLoader(test_dataset, batch_size=config.num_samples, shuffle=False)
 

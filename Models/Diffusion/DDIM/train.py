@@ -60,7 +60,7 @@ def main():
     config_path = "config/config.yaml"
     config = DDIMConfig(config_path)
     # get train data loader
-    train_loader = load_data.load_train_data(config)
+    train_loader = load_data.get_train_loader(config)
 
     in_channel = out_channel = config.channel
 

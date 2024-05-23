@@ -7,8 +7,12 @@ model:
   lambda_A: 10
   lambda_B: 10
   lambda_identity: 0.5
-  channel: 3
   network: cyclegan
+
+dataset:
+  name: vangogh2photo
+  img_size: 256
+  channel: 3
 
 train:
   generator_lr: 0.0002

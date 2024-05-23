@@ -42,6 +42,7 @@ class Generator(nn.Module):
         )
 
     def forward(self, x):
+        # protection for incorrect shape
         if len(x.shape) != 4:
             x = x.unsqueeze(-1).unsqueeze(-1)
 
@@ -93,6 +94,7 @@ class Discriminator(nn.Module):
         for layer in self.discriminator:
             x = layer(x)
 
+        # keep output dim to 1
         x = x.view(-1, 1)
 
         return x

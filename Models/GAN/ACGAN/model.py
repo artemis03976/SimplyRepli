@@ -15,6 +15,7 @@ class Generator(nn.Module):
     ):
         super(Generator, self).__init__()
 
+        # projection from latent space
         self.projection = nn.Linear(latent_dim, proj_dim)
 
         self.generator = nn.ModuleList([])
@@ -53,7 +54,7 @@ class Generator(nn.Module):
 
     def forward(self, x):
         x = self.projection(x)
-
+        # reshape to 4D tensor
         x = x.unsqueeze(-1).unsqueeze(-1)
 
         for layer in self.generator:
@@ -75,7 +76,7 @@ class Discriminator(nn.Module):
         super(Discriminator, self).__init__()
 
         self.num_classes = num_classes
-
+        # final feature size for flatten
         self.feature_size = math.ceil(img_size / 2 ** (num_layers // 2))
 
         self.discriminator = nn.ModuleList([
@@ -114,6 +115,7 @@ class Discriminator(nn.Module):
 
         x = x.view(x.size(0), -1)
         x = self.classifier(x)
+        # split class classification from discriminator classification
         x_dis, x_aux = torch.split(x, [1, self.num_classes], dim=1)
 
         x_dis = F.sigmoid(x_dis)

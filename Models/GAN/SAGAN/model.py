@@ -41,6 +41,7 @@ class Generator(nn.Module):
 
     @staticmethod
     def make_layer(in_channel, out_channel, num_classes, **kwargs):
+        # use spectral norm to stabilize training
         return nn.ModuleList([
             SpectralNorm(nn.ConvTranspose2d(in_channel, out_channel, **kwargs)),
             ConditionalBatchNorm2d(out_channel, num_classes),
@@ -97,6 +98,7 @@ class Discriminator(nn.Module):
 
     @staticmethod
     def make_layer(in_channel, out_channel, **kwargs):
+        # use spectral norm to stabilize training
         return nn.Sequential(
             SpectralNorm(nn.Conv2d(in_channel, out_channel, **kwargs)),
             nn.LeakyReLU(0.1),

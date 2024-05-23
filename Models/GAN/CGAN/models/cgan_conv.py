@@ -14,12 +14,7 @@ class ConvGenerator(nn.Module):
     ):
         super(ConvGenerator, self).__init__()
 
-        self.latent_dim = latent_dim
-        self.mid_channels = mid_channels
-        self.out_channel = out_channel
-        self.num_classes = num_classes
-        self.proj_dim = proj_dim
-
+        # label projection
         self.label_proj = nn.Linear(num_classes, proj_dim)
 
         self.generator = nn.ModuleList([
@@ -53,12 +48,14 @@ class ConvGenerator(nn.Module):
         )
 
     def forward(self, latent, label):
+        # protection for incorrect shape
         if len(latent.shape) != 4:
             latent = latent.unsqueeze(-1).unsqueeze(-1)
 
-        # concatenate label embedding and image tensor
         label_embedding = self.label_proj(label)
+        # expand label embedding to match the size of image tensor
         label_embedding = label_embedding.unsqueeze(-1).unsqueeze(-1)
+        # concatenate label embedding and image tensor
         x = torch.cat([latent, label_embedding], dim=1)
 
         for layer in self.generator:
@@ -78,11 +75,7 @@ class ConvDiscriminator(nn.Module):
     ):
         super(ConvDiscriminator, self).__init__()
 
-        self.in_channel = in_channel
-        self.mid_channels = mid_channels
-        self.num_classes = num_classes
-        self.proj_dim = proj_dim
-
+        # label projection
         self.label_proj = nn.Linear(num_classes, proj_dim)
 
         self.discriminator = nn.ModuleList([
@@ -114,17 +107,17 @@ class ConvDiscriminator(nn.Module):
         )
 
     def forward(self, image, label):
-        # concatenate label embedding and image tensor
         label_embedding = self.label_proj(label)
         # expand label embedding to match the size of image tensor
         label_embedding = label_embedding.unsqueeze(-1).unsqueeze(-1)
         label_embedding = label_embedding.expand(-1, -1, image.size(2), image.size(3))
-
+        # concatenate label embedding and image tensor
         x = torch.cat([image, label_embedding], dim=1)
 
         for layer in self.discriminator:
             x = layer(x)
 
+        # keep output dim to 1
         x = x.view(-1, 1)
 
         return x

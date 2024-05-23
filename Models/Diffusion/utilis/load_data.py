@@ -2,7 +2,7 @@ from torch.utils.data import DataLoader
 from torchvision import transforms, datasets
 
 
-def get_transform(config):
+def get_transforms(config):
     transform = transforms.Compose([
         transforms.Resize(config.img_size),
         transforms.CenterCrop(config.img_size),
@@ -27,12 +27,12 @@ def get_dataset(dataset_info, config):
     return dataset
 
 
-def load_train_data(config):
+def get_train_loader(config):
     root = '../../../datas/' + config.dataset
     dataset_info = {
         'root': root,
         'train': True,
-        'transform': get_transform(config),
+        'transform': get_transforms(config),
         'download': True
     }
 
@@ -43,12 +43,12 @@ def load_train_data(config):
     return train_loader
 
 
-def load_test_data(config):
+def get_test_loader(config):
     root = '../../../datas/' + config.dataset
     dataset_info = {
         'root': root,
         'train': False,
-        'transform': get_transform(config),
+        'transform': get_transforms(config),
         'download': True
     }
 

@@ -42,6 +42,7 @@ class Generator(nn.Module):
         )
 
     def forward(self, x):
+        # protection for incorrect shape
         if len(x.shape) != 4:
             x = x.unsqueeze(-1).unsqueeze(-1)
 

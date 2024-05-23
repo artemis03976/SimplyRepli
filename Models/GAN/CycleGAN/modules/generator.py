@@ -14,6 +14,7 @@ class ResBlock(nn.Module):
             nn.InstanceNorm2d(out_channel),
         )
 
+        # skip connection for different input/output channel
         if in_channel != out_channel:
             self.skip_conn = nn.Conv2d(in_channel, out_channel, kernel_size=1, stride=1)
         else:
@@ -58,7 +59,8 @@ class ResnetGenerator(nn.Module):
             nn.Tanh()
         )
 
-    def make_layer(self, in_channel, out_channel, kernel_size, down=True, **kwargs):
+    @staticmethod
+    def make_layer(in_channel, out_channel, kernel_size, down=True, **kwargs):
         return nn.Sequential(
             nn.Conv2d(in_channel, out_channel, kernel_size, **kwargs) if down
             else nn.ConvTranspose2d(in_channel, out_channel, kernel_size, **kwargs),

@@ -7,10 +7,12 @@ from global_utilis import save_and_load, plot
 
 
 def inference(config, generator, test_loader):
+    # switch mode
     generator_A, generator_B = generator
     generator_A.eval()
     generator_B.eval()
 
+    # show original images
     image_A, image_B = next(iter(test_loader))
     plot.show_img(image_A, cols=8)
     plot.show_img(image_B, cols=8)
@@ -19,14 +21,16 @@ def inference(config, generator, test_loader):
     image_B = image_B.to(config.device)
 
     with torch.no_grad():
+        # generate fake images
         fake_B = generator_A(image_A)
         fake_A = generator_B(image_B)
         reconstructed_B = generator_B(fake_A)
         reconstructed_A = generator_A(fake_B)
 
+    # show generated images
     plot.show_img(fake_A, cols=8)
     plot.show_img(fake_B, cols=8)
-
+    # show reconstructed images after cycle
     plot.show_img(reconstructed_A, cols=8)
     plot.show_img(reconstructed_B, cols=8)
 

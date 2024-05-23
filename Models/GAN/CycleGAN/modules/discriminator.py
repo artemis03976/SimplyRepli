@@ -48,6 +48,7 @@ class PatchGANDiscriminator(nn.Module):
             BasicConv(in_channel, out_channel, kernel_size=4, stride=1, padding=1)
         )
 
+        # control size of output image to be patch size
         self.final_conv = nn.Conv2d(out_channel, 1, kernel_size=4, stride=1, padding=1)
 
     def forward(self, x):

@@ -7,8 +7,10 @@ from global_utilis import save_and_load, plot
 
 
 def inference(config, generator, test_loader):
+    # switch mode
     generator.eval()
 
+    # show original images
     image_A, image_B = next(iter(test_loader))
     plot.show_img(image_A, cols=2)
     plot.show_img(image_B, cols=2)
@@ -18,6 +20,7 @@ def inference(config, generator, test_loader):
     with torch.no_grad():
         fake_B = generator(image_A)
 
+    # show generated images
     plot.show_img(fake_B, cols=2)
 
 

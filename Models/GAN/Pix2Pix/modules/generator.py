@@ -63,6 +63,7 @@ class UNetBlock(nn.Module):
             down_up_sample=True,
     ):
         super().__init__()
+
         self.down_block = nn.ModuleList([])
         self.up_block = nn.ModuleList([])
 
@@ -107,6 +108,7 @@ class UNetGenerator(nn.Module):
     ):
         super().__init__()
 
+        # unet network for segmentation-like work
         if ch_mult is None:
             ch_mult = [1, 2, 4, 8]
 

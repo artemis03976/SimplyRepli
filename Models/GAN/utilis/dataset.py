@@ -13,7 +13,6 @@ class CycleGANDataset(Dataset):
 
         self.filenames_A = os.listdir(self.root_A)
         self.filenames_B = os.listdir(self.root_B)
-        print(1)
 
     def __len__(self):
         return max(len(self.filenames_A), len(self.filenames_B))
@@ -30,6 +29,7 @@ class CycleGANDataset(Dataset):
         image_A = Image.open(file_path_A)
         image_B = Image.open(file_path_B)
 
+        # apply transform
         if self.transform is not None:
             image_A = self.transform(image_A)
             image_B = self.transform(image_B)
@@ -54,10 +54,12 @@ class Pix2PixDataset(Dataset):
 
         image = Image.open(file_path)
 
+        # split image A and B from one image
         width, height = image.size
         image_A = image.crop((0, 0, width // 2, height))
         image_B = image.crop((width // 2, 0, width, height))
 
+        # apply transform
         if self.transform is not None:
             image_A = self.transform(image_A)
             image_B = self.transform(image_B)

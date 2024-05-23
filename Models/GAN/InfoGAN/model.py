@@ -75,7 +75,8 @@ class Generator(nn.Module):
                 nn.init.constant_(module.weight, 1)
                 nn.init.constant_(module.bias, 0)
 
-    def make_layer(self, in_channel, out_channel, **kwargs):
+    @staticmethod
+    def make_layer(in_channel, out_channel, **kwargs):
         return nn.Sequential(
             nn.ConvTranspose2d(in_channel, out_channel, **kwargs),
             nn.BatchNorm2d(out_channel),
@@ -130,8 +131,10 @@ class Discriminator(nn.Module):
                 )
             )
 
+        # head for classification
         self.d_head = nn.Linear(1024 if in_channel == 1 else feature_size * feature_size * base_channel, 1)
 
+        # head for latent representation
         self.q_head = nn.Sequential(
             nn.Linear(1024 if in_channel == 1 else feature_size * feature_size * base_channel, 128, bias=False),
             nn.BatchNorm1d(128),
@@ -152,7 +155,8 @@ class Discriminator(nn.Module):
                 nn.init.constant_(module.weight, 1)
                 nn.init.constant_(module.bias, 0)
 
-    def make_layer(self, in_channel, out_channel, **kwargs):
+    @staticmethod
+    def make_layer(in_channel, out_channel, **kwargs):
         return nn.Sequential(
             nn.Conv2d(in_channel, out_channel, **kwargs),
             nn.BatchNorm2d(out_channel),

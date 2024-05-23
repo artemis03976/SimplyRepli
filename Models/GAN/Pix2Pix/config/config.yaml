@@ -6,8 +6,12 @@ model:
   base_channel: 64
   ch_mult: [1, 2, 4, 8]
   l1_lambda: 100
-  channel: 3
   network: pix2pix
+
+dataset:
+  name: cityscapes
+  img_size: 256
+  channel: 3
 
 train:
   generator_lr: 0.0002

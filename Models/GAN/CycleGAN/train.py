@@ -13,14 +13,13 @@ from global_utilis import save_and_load
 
 def train(config, model, train_loader):
     generator_A, generator_B, discriminator_A, discriminator_B = model
-
+    # pre-defined loss function and optimizer
     optimizer_generator = optim.Adam(
         itertools.chain(generator_A.parameters(), generator_B.parameters()), lr=config.generator_lr, betas=(0.5, 0.999)
     )
     optimizer_discriminator = optim.Adam(
         itertools.chain(discriminator_A.parameters(), discriminator_B.parameters()), lr=config.discriminator_lr, betas=(0.5, 0.999)
     )
-
     criterion = nn.MSELoss()
 
     num_epochs = config.epochs
@@ -32,6 +31,7 @@ def train(config, model, train_loader):
         train_info = tqdm(train_loader, unit="batch")
         train_info.set_description(f"Epoch {epoch + 1}/{num_epochs}")
 
+        # main train step
         total_loss = train_step(
             model,
             config,
@@ -42,9 +42,7 @@ def train(config, model, train_loader):
 
         print(
             '\nEpoch [{}/{}], Generator Loss: {:.4f}, Discriminator Loss: {:.4f}'
-            .format(
-                epoch + 1, num_epochs, total_loss[0], total_loss[1]
-            )
+            .format(epoch + 1, num_epochs, total_loss[0], total_loss[1])
         )
 
     print("Finish training...")
@@ -53,13 +51,12 @@ def train(config, model, train_loader):
 
 
 def train_step(model, config, train_info, criterion, optimizer):
+    # unpacking
     generator_A, generator_B, discriminator_A, discriminator_B = model
-
     generator_A.train()
     generator_B.train()
     discriminator_A.train()
     discriminator_B.train()
-
     optimizer_generator, optimizer_discriminator = optimizer
 
     total_loss_g = 0.0
@@ -69,7 +66,7 @@ def train_step(model, config, train_info, criterion, optimizer):
         batch_size = image_A.shape[0]
         image_A = image_A.to(config.device)
         image_B = image_B.to(config.device)
-
+        # labels for discriminator
         real_labels = torch.ones(batch_size, 1, 1, 1, device=config.device)
         fake_labels = torch.zeros(batch_size, 1, 1, 1, device=config.device)
 
@@ -82,10 +79,10 @@ def train_step(model, config, train_info, criterion, optimizer):
             discriminator_A.zero_grad()
 
             fake_B = generator_A(real_A)
-
+            # calculate loss on real data
             output_real = discriminator_A(real_B)
             loss_real = criterion(output_real, real_labels.expand_as(output_real))
-
+            # calculate loss on fake data
             output_fake = discriminator_A(fake_B.detach())
             loss_fake = criterion(output_fake, fake_labels.expand_as(output_fake))
 
@@ -96,10 +93,10 @@ def train_step(model, config, train_info, criterion, optimizer):
             discriminator_B.zero_grad()
 
             fake_A = generator_B(real_B)
-
+            # calculate loss on real data
             output_real = discriminator_B(real_A)
             loss_real = criterion(output_real, real_labels.expand_as(output_real))
-
+            # calculate loss on fake data
             output_fake = discriminator_B(fake_A.detach())
             loss_fake = criterion(output_fake, fake_labels.expand_as(output_fake))
 
@@ -143,7 +140,7 @@ def train_step(model, config, train_info, criterion, optimizer):
             optimizer_generator.step()
 
             total_loss_g += loss_generator.item()
-
+        # set progress bar info
         train_info.set_postfix(loss_d=loss_discriminator.item(), loss_g=loss_generator.item())
 
     return (

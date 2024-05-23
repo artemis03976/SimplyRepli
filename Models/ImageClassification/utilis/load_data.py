@@ -38,35 +38,34 @@ def get_transforms(config):
 
 
 # TODO:custom dataset
-
-
-def get_train_val_loader(config):
+def get_dataset(dataset_info, config):
     if config.dataset == 'cifar100':
-        dataset = datasets.CIFAR100(
-            root="../../../datas/cifar100",
-            train=True,
-            download=True,
-        )
+        dataset = datasets.CIFAR100(**dataset_info)
     elif config.dataset == 'cifar10':
-        dataset = datasets.CIFAR10(
-            root="../../../datas/cifar10",
-            train=True,
-            download=True,
-        )
+        dataset = datasets.CIFAR10(**dataset_info)
     elif config.dataset == 'mnist':
-        dataset = datasets.MNIST(
-            root="../../../datas/mnist",
-            train=True,
-            download=True,
-        )
+        dataset = datasets.MNIST(**dataset_info)
     else:
         raise NotImplementedError('Unsupported dataset: {}'.format(config.dataset))
 
+    return dataset
+
+
+def get_train_val_loader(config):
+    root = '../../../datas/' + config.dataset
+    dataset_info = {
+        'root': root,
+        'train': True,
+        'download': True
+    }
+
+    train_dataset = get_dataset(dataset_info, config)
+
     # split dataset into train and validation
-    total_samples = len(dataset)
+    total_samples = len(train_dataset)
     num_train_samples = int(total_samples * num_train_samples_ratio)
     num_val_samples = total_samples - num_train_samples
-    train_dataset, val_dataset = random_split(dataset, [num_train_samples, num_val_samples])
+    train_dataset, val_dataset = random_split(train_dataset, [num_train_samples, num_val_samples])
 
     # apply transforms
     data_transforms = get_transforms(config)
@@ -81,30 +80,16 @@ def get_train_val_loader(config):
 
 
 def get_test_loader(config):
-    if config.dataset == 'cifar100':
-        dataset = datasets.CIFAR100(
-            root="../../../datas/cifar100",
-            train=False,
-            transform=get_transforms(config)['test'],
-            download=True,
-        )
-    elif config.dataset == 'cifar10':
-        dataset = datasets.CIFAR10(
-            root="../../../datas/cifar10",
-            train=False,
-            transform=get_transforms(config)['test'],
-            download=True,
-        )
-    elif config.dataset == 'mnist':
-        dataset = datasets.MNIST(
-            root="../../../datas/mnist",
-            train=False,
-            transform=get_transforms(config)['test'],
-            download=True,
-        )
-    else:
-        raise NotImplementedError('Unsupported dataset: {}'.format(config.dataset))
+    root = '../../../datas/' + config.dataset
+    dataset_info = {
+        'root': root,
+        'train': False,
+        'transform': get_transforms(config)['test'],
+        'download': True
+    }
 
-    test_loader = DataLoader(dataset, batch_size=config.num_samples, shuffle=False)
+    test_dataset = get_dataset(dataset_info, config)
+
+    test_loader = DataLoader(test_dataset, batch_size=config.num_samples, shuffle=False)
 
     return test_loader

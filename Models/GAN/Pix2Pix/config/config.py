@@ -13,7 +13,9 @@ class Pix2PixConfig:
         self.ch_mult = self.config['model']['ch_mult']
         self.l1_lambda = self.config['model']['l1_lambda']
 
-        self.channel = self.config['model']['channel']
+        self.dataset = self.config['dataset']['name']
+        self.img_size = self.config['dataset']['img_size']
+        self.channel = self.config['dataset']['channel']
 
         self.network = self.config['model']['network']
 

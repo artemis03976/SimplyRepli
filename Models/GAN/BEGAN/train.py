@@ -5,14 +5,13 @@ from tqdm import tqdm
 from model import Generator, Discriminator
 from config.config import BEGANConfig
 from Models.GAN.utilis import load_data
-from global_utilis import save_and_load, plot
+from global_utilis import save_and_load
 
 
 def train(config, model, train_loader):
     generator, discriminator = model
-
+    # pre-defined loss function and optimizer
     criterion = nn.L1Loss()
-
     optimizer_generator = optim.Adam(generator.parameters(), lr=config.generator_lr, betas=(0.5, 0.999))
     optimizer_discriminator = optim.Adam(discriminator.parameters(), lr=config.discriminator_lr, betas=(0.5, 0.999))
 
@@ -25,33 +24,19 @@ def train(config, model, train_loader):
         train_info = tqdm(train_loader, unit="batch")
         train_info.set_description(f"Epoch {epoch + 1}/{num_epochs}")
 
-        total_loss = train_step(model, config, train_info, criterion,
-                                (optimizer_generator, optimizer_discriminator))
+        # main train step
+        total_loss = train_step(
+            model,
+            config,
+            train_info,
+            criterion,
+            (optimizer_generator, optimizer_discriminator)
+        )
 
         print(
             '\nEpoch [{}/{}], Generator Loss: {:.4f}, Discriminator Loss: {:.4f}'
-            .format(
-                epoch + 1, num_epochs, total_loss[0], total_loss[1]
-            )
+            .format(epoch + 1, num_epochs, total_loss[0], total_loss[1])
         )
-
-        with torch.no_grad():
-            samples = next(iter(train_loader))[0].to(config.device)
-            recon = discriminator(samples)
-            recon = 0.5 * (recon + 1)
-            recon = recon.clamp(0, 1)
-            plot.show_img(recon, cols=8)
-
-            generation = generator(torch.rand(config.num_samples, config.latent_dim, device=config.device) * 2 - 1)
-            generation = generation.view(config.num_samples, config.channel, config.img_size, config.img_size)
-            gen = 0.5 * (generation + 1)
-            gen = gen.clamp(0, 1)
-            plot.show_img(gen, cols=8)
-
-            recon = discriminator(generation)
-            recon = 0.5 * (recon + 1)
-            recon = recon.clamp(0, 1)
-            plot.show_img(recon, cols=8)
 
     print("Finish training...")
 
@@ -59,10 +44,10 @@ def train(config, model, train_loader):
 
 
 def train_step(model, config, train_info, criterion, optimizer):
+    # unpacking
     generator, discriminator = model
     generator.train()
     discriminator.train()
-
     optimizer_generator, optimizer_discriminator = optimizer
 
     total_loss_g = 0.0
@@ -73,18 +58,18 @@ def train_step(model, config, train_info, criterion, optimizer):
         image = image.to(config.device)
 
         real_data = image
+        # generate fake data
         z = torch.rand(batch_size, config.latent_dim, device=config.device) * 2 - 1
         fake_data = generator(z)
 
         # step1: train discriminator
         optimizer_discriminator.zero_grad()
-
+        # calculate loss on real data
         output_real = discriminator(real_data)
         loss_real = criterion(output_real, real_data)
-
+        # calculate loss on fake data
         output_fake = discriminator(fake_data.detach())
         loss_fake = criterion(output_fake, fake_data.detach())
-
         loss_discriminator = loss_real - config.k * loss_fake
         loss_discriminator.backward()
 
@@ -106,9 +91,9 @@ def train_step(model, config, train_info, criterion, optimizer):
         # update k
         config.k += config.lambda_k * (config.gamma * loss_real.item() - loss_fake.item())
         config.k = max(min(config.k, 1.0), 0.0)
-
+        # calculate measure
         measure = loss_real.item() + torch.abs(config.gamma * loss_real - loss_fake).item()
-
+        # set progress bar info
         train_info.set_postfix(loss_g=loss_generator.item(), loss_d=loss_discriminator.item(), measure=measure, k=config.k)
 
     return (

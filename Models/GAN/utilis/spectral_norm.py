@@ -26,6 +26,7 @@ class SpectralNorm(nn.Module):
         self.register_buffer('u', self.l2_normalize(u))
         self.register_buffer('v', self.l2_normalize(v))
 
+        # use differentiable spectral norm, which need manually change the flow direction of the gradient
         delattr(self.module, self.param_name)
         self.module.register_parameter(self.param_name + "_origin", original_weight)
         setattr(self.module, self.param_name, original_weight.data)

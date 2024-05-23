@@ -10,9 +10,8 @@ from global_utilis import save_and_load
 
 def train(config, model, train_loader):
     generator, discriminator = model
-
+    # pre-defined loss function and optimizer
     criterion = nn.MSELoss()
-
     optimizer_generator = optim.Adam(generator.parameters(), lr=config.generator_lr, betas=(0.5, 0.999))
     optimizer_discriminator = optim.Adam(discriminator.parameters(), lr=config.discriminator_lr, betas=(0.5, 0.999))
 
@@ -25,14 +24,18 @@ def train(config, model, train_loader):
         train_info = tqdm(train_loader, unit="batch")
         train_info.set_description(f"Epoch {epoch + 1}/{num_epochs}")
 
-        total_loss = train_step(model, config, train_info, criterion,
-                                (optimizer_generator, optimizer_discriminator))
+        # main train step
+        total_loss = train_step(
+            model,
+            config,
+            train_info,
+            criterion,
+            (optimizer_generator, optimizer_discriminator)
+        )
 
         print(
             '\nEpoch [{}/{}], Generator Loss: {:.4f}, Discriminator Loss: {:.4f}'
-            .format(
-                epoch + 1, num_epochs, total_loss[0], total_loss[1]
-            )
+            .format(epoch + 1, num_epochs, total_loss[0], total_loss[1])
         )
 
     print("Finish training...")
@@ -55,10 +58,10 @@ def pull_away_loss(latent_code):
 
 
 def train_step(model, config, train_info, criterion, optimizer):
+    # unpacking
     generator, discriminator = model
     generator.train()
     discriminator.train()
-
     optimizer_generator, optimizer_discriminator = optimizer
 
     total_loss_g = 0.0
@@ -69,19 +72,22 @@ def train_step(model, config, train_info, criterion, optimizer):
         image = image.to(config.device)
 
         real_data = image
-        fake_data = generator(torch.randn(batch_size, config.latent_dim, device=config.device))
+        # generate fake data
+        z = torch.randn(batch_size, config.latent_dim, device=config.device)
+        fake_data = generator(z)
 
         # step1: train discriminator
         for _ in range(config.d_step):
             optimizer_discriminator.zero_grad()
 
+            # calculate loss on real data
             output_real, _ = discriminator(real_data)
             loss_real = criterion(output_real, real_data)
 
+            # calculate loss on fake data
             output_fake, _ = discriminator(fake_data.detach())
             energy_fake = criterion(output_fake, fake_data.detach())
             loss_fake = torch.clamp(config.margin - energy_fake, min=0.0)
-
             loss_discriminator = loss_real + loss_fake
             loss_discriminator.backward()
 
@@ -95,6 +101,7 @@ def train_step(model, config, train_info, criterion, optimizer):
 
             output_fake, latent_code = discriminator(fake_data)
             loss_gan = criterion(output_fake, fake_data)
+            # calculate pull away loss
             loss_pt = config.lambda_pt * pull_away_loss(latent_code)
             loss_generator = loss_gan + loss_pt
             loss_generator.backward()
@@ -102,7 +109,7 @@ def train_step(model, config, train_info, criterion, optimizer):
             optimizer_generator.step()
 
             total_loss_g += loss_generator.item()
-
+        # set progress bar info
         train_info.set_postfix(loss_g=loss_generator.item(), loss_d=loss_discriminator.item())
 
     return (

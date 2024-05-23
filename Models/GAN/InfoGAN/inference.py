@@ -36,15 +36,17 @@ def sample_noise(config, random=True):
 
 
 def inference(config, generator):
+    # switch mode
     generator.eval()
 
     with torch.no_grad():
         latent_noise, latent_discrete, _, latent_continuous = sample_noise(config, random=False)
+        # generate for different settings
         for i, lc in enumerate(latent_continuous):
             latent = torch.cat([latent_noise, latent_discrete, lc], dim=1)
             generation = generator(latent)
             out = generation.view(-1, 1, 28, 28)
-
+            # show generated images
             plot.show_img(out, cols=int(config.num_samples ** 0.5))
 
 

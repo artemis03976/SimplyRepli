@@ -89,6 +89,7 @@ class Discriminator(nn.Module):
 
     @staticmethod
     def make_layer(in_channel, out_channel):
+        # use spectral norm only in discriminator
         return nn.Sequential(
             SpectralNorm(nn.Conv2d(in_channel, out_channel, kernel_size=3, stride=1, padding=1)),
             nn.LeakyReLU(0.1),

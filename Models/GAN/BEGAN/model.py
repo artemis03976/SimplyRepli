@@ -50,7 +50,7 @@ class Generator(nn.Module):
         self.generator_proj = nn.Linear(latent_dim, base_channel * self.feature_size * self.feature_size)
 
         self.generator = nn.ModuleList([])
-
+        # decoder structure for generator
         for i in range(num_layers):
             self.generator.append(
                 self.make_layer(base_channel, base_channel)
@@ -78,6 +78,7 @@ class Generator(nn.Module):
 
     def forward(self, x):
         x = self.generator_proj(x)
+        # reshape to image shape
         x = x.view(x.shape[0], -1, self.feature_size, self.feature_size)
 
         for layer in self.generator:
@@ -98,7 +99,7 @@ class Discriminator(nn.Module):
         super(Discriminator, self).__init__()
 
         self.feature_size = img_size // 2 ** (num_layers - 1)
-
+        # encoder-decider structure for discriminator
         self.encoder = nn.ModuleList([
             nn.Sequential(
                 nn.Conv2d(in_channel, base_channel, kernel_size=3, stride=1, padding=1),
@@ -120,6 +121,7 @@ class Discriminator(nn.Module):
 
             prev_channel = current_channel
 
+        # latent code projection
         self.encoder_proj = nn.Linear(self.feature_size * self.feature_size * num_layers * base_channel, latent_dim)
         self.decoder_proj = nn.Linear(latent_dim, self.feature_size * self.feature_size * base_channel)
 
@@ -154,6 +156,7 @@ class Discriminator(nn.Module):
         for encoder_layer in self.encoder:
             x = encoder_layer(x)
 
+        # reshape from flatten to image shape
         x = self.encoder_proj(x.view(x.shape[0], -1))
         x = self.decoder_proj(x).reshape(x.shape[0], -1, self.feature_size, self.feature_size)
 

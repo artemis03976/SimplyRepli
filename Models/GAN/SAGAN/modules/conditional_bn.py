@@ -9,6 +9,7 @@ class ConditionalBatchNorm2d(nn.Module):
 
         self.bn = nn.BatchNorm2d(num_features, affine=False)
 
+        # conditional embedding to hold extra info
         self.condition_proj = nn.Embedding(num_conditions, num_features * 2)
 
     def forward(self, x, condition):
