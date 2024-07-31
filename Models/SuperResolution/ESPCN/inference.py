@@ -1,22 +1,10 @@
 import torch
 import math
-from PIL import Image
 import numpy as np
-from torchvision import transforms
 from global_utilis import plot, save_and_load, save_img
-from Models.SuperResolution.utilis import load_data
+from Models.SuperResolution.utilis import load_data, convert
 from config.config import ESPCNConfig
 from model import ESPCN
-
-
-def convert_ycbcr_to_rgb(y, cb, cr):
-    y = transforms.ToPILImage()(y)
-    cb = Image.fromarray(cb.numpy(), mode='L')
-    cr = Image.fromarray(cr.numpy(), mode='L')
-
-    rgb = Image.merge('YCbCr', (y, cb, cr)).convert('RGB')
-
-    return rgb
 
 
 @torch.no_grad()
@@ -37,11 +25,11 @@ def inference(config, model):
     sr_imgs = []
 
     for y, cb, cr in zip(lr_img, lr_cb, lr_cr):
-        rgb_lr_img = convert_ycbcr_to_rgb(y, cb, cr)
+        rgb_lr_img = convert.convert_ycbcr_to_rgb(y, cb, cr)
         lr_imgs.append(rgb_lr_img)
 
     for y, cb, cr in zip(sr_img, sr_cb, sr_cr):
-        rgb_sr_img = convert_ycbcr_to_rgb(y, cb, cr)
+        rgb_sr_img = convert.convert_ycbcr_to_rgb(y, cb, cr)
         sr_imgs.append(rgb_sr_img)
 
     plot.show_img(np.array(lr_imgs).transpose(0, 3, 1, 2), cols=int(math.sqrt(config.num_samples)))
@@ -52,7 +40,7 @@ def inference(config, model):
 
     converted_img = []
     for (img_y, img_cb, img_cr) in zip(recon_sr_img, sr_cb, sr_cr):
-        img = convert_ycbcr_to_rgb(img_y, img_cb, img_cr)
+        img = convert.convert_ycbcr_to_rgb(img_y, img_cb, img_cr)
         converted_img.append(img)
 
     plot.show_img(np.array(converted_img).transpose(0, 3, 1, 2), cols=int(math.sqrt(config.num_samples)))

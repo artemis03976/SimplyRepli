@@ -3,8 +3,7 @@ import torch.optim as optim
 from tqdm import tqdm
 from model import Generator, Discriminator
 from config.config import WGANGPConfig
-from modules import gradient_penalty
-from Models.GAN.utilis import load_data
+from Models.GAN.utilis import load_data, gradient_penalty
 from global_utilis import save_and_load
 
 

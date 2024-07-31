@@ -1,0 +1,22 @@
+project_name: edsr
+
+model:
+  mid_channel: 64
+  num_blocks: 16
+  network: edsr
+
+dataset:
+  name: bsds500
+  img_size: 300
+  channel: 3
+  scale_factor: 2
+
+train:
+  learning_rate: 0.001
+  epochs: 25
+  batch_size: 4
+
+inference:
+  num_samples: 16
+
+device: cuda

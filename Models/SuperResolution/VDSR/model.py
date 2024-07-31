@@ -39,7 +39,7 @@ class VDSR(nn.Module):
         )
 
     def forward(self, x):
-        res = x
+        identity = x
 
         x = self.in_conv(x)
 
@@ -48,5 +48,5 @@ class VDSR(nn.Module):
 
         x = self.out_conv(x)
 
-        x = x + res
+        x = x + identity
         return x
