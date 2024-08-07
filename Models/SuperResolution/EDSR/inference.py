@@ -1,8 +1,7 @@
 import torch
 import math
-import numpy as np
 from global_utilis import plot, save_and_load, save_img
-from Models.SuperResolution.utilis import load_data, convert
+from Models.SuperResolution.utilis import load_data
 from config.config import EDSRConfig
 from model import EDSR
 

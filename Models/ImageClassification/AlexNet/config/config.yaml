@@ -11,8 +11,8 @@ dataset:
   num_classes: 100
 
 train:
-  learning_rate: 0.0005
-  epochs: 40
+  learning_rate: 0.0001
+  epochs: 100
   batch_size: 128
 
 inference:

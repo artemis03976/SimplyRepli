@@ -1,0 +1,20 @@
+project_name: convnext
+
+model:
+  network: ConvNeXt-T
+
+dataset:
+  name: cifar100
+  img_size: 224
+  channel: 3
+  num_classes: 100
+
+train:
+  learning_rate: 0.001
+  epochs: 30
+  batch_size: 32
+
+inference:
+  num_samples: 32
+
+device: cuda

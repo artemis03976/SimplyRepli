@@ -19,7 +19,7 @@ def train(config, model):
     num_epochs = config.epochs
 
     # initialize early stopping
-    early_stopping = EarlyStopping(patience=3, delta=0.001)
+    early_stopping = EarlyStopping(patience=5, delta=0.001)
 
     print("Start training...")
 
@@ -29,21 +29,21 @@ def train(config, model):
         train_info.set_description(f"Epoch {epoch + 1}/{num_epochs}")
 
         # main train step
-        total_loss = train_step(model, config, train_info, criterion, optimizer)
+        train_loss, train_accuracy = train_step(model, config, train_info, criterion, optimizer)
         # main val step
-        total_accuracy = validation(model, config, val_loader)
+        val_loss, val_accuracy = validation(model, config, val_loader, criterion)
 
         print(
-            '\nEpoch [{}/{}], Average Loss: {:.4f}'
-            .format(epoch + 1, num_epochs, total_loss / len(train_loader))
+            '\nEpoch [{}/{}], Average Loss: {:.4f}, Average Accuracy: {:.4f}'
+            .format(epoch + 1, num_epochs, train_loss, train_accuracy)
         )
         print(
-            'Validation Accuracy: {:.4f}'
-            .format(total_accuracy)
+            'Validation Loss: {:.4f}, Validation Accuracy: {:.4f}'
+            .format(val_loss, val_accuracy)
         )
 
         # check early stopping condition
-        early_stopping(total_accuracy)
+        early_stopping(val_accuracy)
         if early_stopping.early_stop:
             print("Need Early Stopping")
             break
@@ -57,6 +57,9 @@ def train_step(model, config, train_info, criterion, optimizer):
     # switch mode
     model.train()
     total_loss = 0.0
+    total_accuracy = 0.0
+    # recounting for mean accuracy
+    num_samples = 0
 
     for batch_idx, (image, label) in enumerate(train_info):
         image = image.to(config.device)
@@ -82,15 +85,23 @@ def train_step(model, config, train_info, criterion, optimizer):
         optimizer.step()
 
         total_loss += loss.item()
+        # calculate accuracy
+        if config.network in ['inception_v3', 'googlenet']:
+            prediction = prediction['main']
+        acc = torch.sum(torch.eq(prediction.argmax(dim=1), label))
+        total_accuracy += acc.item()
+        num_samples += image.shape[0]
+
         # set progress bar info
-        train_info.set_postfix(Loss=loss.item())
+        train_info.set_postfix(Loss=loss.item(), Acc=acc / image.shape[0])
 
-    return total_loss
+    return total_loss / len(train_info), total_accuracy / num_samples
 
 
-def validation(model, config, val_loader):
+def validation(model, config, val_loader, criterion):
     # switch mode
     model.eval()
+    total_loss = 0.0
     total_accuracy = 0.0
     # recounting for mean accuracy
     num_samples = 0
@@ -103,10 +114,11 @@ def validation(model, config, val_loader):
             prediction = model(image)
             # special branch for Inception network
             if config.network in ['inception_v3', 'googlenet']:
-                prediction = prediction[0]
+                prediction = prediction['main']
 
+            total_loss += criterion(prediction, label).item()
             # calculate accuracy
             total_accuracy += torch.sum(torch.eq(prediction.argmax(dim=1), label)).item()
             num_samples += image.shape[0]
 
-    return total_accuracy / num_samples
+    return total_loss / len(val_loader), total_accuracy / num_samples

@@ -10,25 +10,28 @@ def get_transforms(config):
         mean = [0.5]
         std = [0.5]
     else:
-        mean = [0.5, 0.5, 0.5]
-        std = [0.5, 0.5, 0.5]
+        mean = [0.485, 0.456, 0.406]
+        std = [0.229, 0.224, 0.225]
 
     transform = {
         # train dataset with augmentation
         'train': transforms.Compose([
-            transforms.Resize(config.img_size),
+            transforms.RandomResizedCrop(config.img_size, scale=(0.08, 1.0), ratio=(3. / 4., 4. / 3.)),
             transforms.RandomHorizontalFlip(p=0.5),
-            transforms.RandomRotation(degrees=10),
+            transforms.RandomRotation(degrees=30),
+            transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.2),
             transforms.ToTensor(),
             transforms.Normalize(mean=mean, std=std)
         ]),
         'val': transforms.Compose([
-            transforms.Resize(config.img_size),
+            transforms.Resize(256),
+            transforms.CenterCrop(config.img_size),
             transforms.ToTensor(),
             transforms.Normalize(mean=mean, std=std)
         ]),
         'test': transforms.Compose([
-            transforms.Resize(config.img_size),
+            transforms.Resize(256),
+            transforms.CenterCrop(config.img_size),
             transforms.ToTensor(),
             transforms.Normalize(mean=mean, std=std)
         ]),
@@ -37,7 +40,7 @@ def get_transforms(config):
     return transform
 
 
-# TODO:custom dataset
+# TODO: custom dataset
 def get_dataset(dataset_info, config):
     if config.dataset == 'cifar100':
         dataset = datasets.CIFAR100(**dataset_info)
@@ -45,6 +48,11 @@ def get_dataset(dataset_info, config):
         dataset = datasets.CIFAR10(**dataset_info)
     elif config.dataset == 'mnist':
         dataset = datasets.MNIST(**dataset_info)
+    elif config.dataset == 'mini-imagenet':
+        if dataset_info['train']:
+            dataset = datasets.ImageFolder(root=dataset_info['root'] + '/train')
+        else:
+            dataset = datasets.ImageFolder(root=dataset_info['root'] + '/val')
     else:
         raise NotImplementedError('Unsupported dataset: {}'.format(config.dataset))
 
