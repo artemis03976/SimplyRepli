@@ -1,0 +1,21 @@
+project_name: unet
+
+model:
+  ch_multi: [1, 2, 4, 8]
+  network: unet
+
+dataset:
+  name: carvana
+  img_size: 512
+  channel: 3
+  num_classes: 1
+
+train:
+  learning_rate: 0.001
+  epochs: 30
+  batch_size: 4
+
+inference:
+  num_samples: 4
+
+device: cuda
