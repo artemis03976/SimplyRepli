@@ -1,8 +1,8 @@
 import torch
 import math
 
-from config.config import UNetConfig
-from model import UNet
+from config.config import TransUNetConfig
+from model import TransUNet
 from Models.UNet.utilis import crop, load_data
 from global_utilis import save_and_load, plot
 
@@ -25,18 +25,23 @@ def inference(config, model):
         plot.show_img(image, cols=int(math.sqrt(config.num_samples)))
         # plot every class
         for i in range(mask.shape[1]):
-            plot.show_img(mask[:, i].unsqueeze(1), cols=int(math.sqrt(config.num_samples)))
-            plot.show_img(prediction[:, i].unsqueeze(1), cols=int(math.sqrt(config.num_samples)))
+            plot.show_img(mask[:, i], cols=int(math.sqrt(config.num_samples)))
+            plot.show_img(prediction[:, i], cols=int(math.sqrt(config.num_samples)))
 
 
 def main():
     config_path = "config/config.yaml"
-    config = UNetConfig(config_path)
+    config = TransUNetConfig(config_path)
 
-    model = UNet(
+    model = TransUNet(
         config.channel,
+        config.out_channel,
         config.num_classes,
-        config.ch_multi,
+        config.img_size,
+        config.patch_size,
+        config.num_layers,
+        config.num_heads,
+        config.mlp_dim
     ).to(config.device)
 
     save_and_load.load_weight(config, model)

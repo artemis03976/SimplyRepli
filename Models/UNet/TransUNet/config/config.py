@@ -1,13 +1,17 @@
 from yaml import safe_load
 
 
-class UNetConfig:
+class TransUNetConfig:
     def __init__(self, config_path: str) -> None:
         self.config = safe_load(open(config_path, 'r', encoding='utf-8'))
 
         self.project_name = self.config['project_name']
 
-        self.ch_multi = self.config['model']['ch_multi']
+        self.out_channel = self.config['model']['out_channel']
+        self.patch_size = self.config['model']['patch_size']
+        self.num_layers = self.config['model']['num_layers']
+        self.num_heads = self.config['model']['num_heads']
+        self.mlp_dim = self.config['model']['mlp_dim']
 
         self.network = self.config['model']['network']
 

@@ -3,15 +3,16 @@ import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
 
-from config.config import UNetConfig
-from model import UNet
+from config.config import TransUNetConfig
+from model import TransUNet
+from loss import Loss
 from Models.UNet.utilis import crop, load_data
 from global_utilis.early_stopping import EarlyStopping
 from global_utilis import save_and_load
 
 
 def train(config, model):
-    criterion = nn.BCEWithLogitsLoss()
+    criterion = Loss()
     optimizer = optim.Adam(model.parameters(), lr=config.learning_rate)
     num_epochs = config.epochs
 
@@ -30,11 +31,10 @@ def train(config, model):
 
         val_loss = validation(model, config, val_loader, criterion)
 
-        early_stopping(val_loss)
-
         print('\nEpoch [{}/{}], Average Loss: {:.4f}'.format(epoch + 1, num_epochs, total_loss / len(train_loader)))
         print('Validation Loss: {:.4f}'.format(val_loss))
 
+        early_stopping(val_loss)
         if early_stopping.early_stop:
             print("Need Early Stopping")
             break
@@ -91,12 +91,17 @@ def validation(model, config, val_loader, criterion):
 
 def main():
     config_path = "config/config.yaml"
-    config = UNetConfig(config_path)
+    config = TransUNetConfig(config_path)
 
-    model = UNet(
+    model = TransUNet(
         config.channel,
+        config.out_channel,
         config.num_classes,
-        config.ch_multi,
+        config.img_size,
+        config.patch_size,
+        config.num_layers,
+        config.num_heads,
+        config.mlp_dim
     ).to(config.device)
 
     train(config, model)

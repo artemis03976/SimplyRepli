@@ -1,8 +1,12 @@
-project_name: unet
+project_name: transunet
 
 model:
-  ch_multi: [1, 2, 4, 8]
-  network: unet
+  out_channel: 128
+  patch_size: 16
+  num_layers: 6
+  num_heads: 8
+  mlp_dim: 1024
+  network: transunet
 
 dataset:
   name: carvana
@@ -13,10 +17,10 @@ dataset:
 train:
   learning_rate: 0.001
   epochs: 30
-  batch_size: 4
+  batch_size: 2
 
 inference:
-  num_samples: 4
+  num_samples: 32
   mask_threshold: 0.75
 
 device: cuda
