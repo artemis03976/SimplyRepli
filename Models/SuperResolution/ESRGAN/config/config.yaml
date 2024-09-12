@@ -1,0 +1,27 @@
+project_name: esrgan
+
+model:
+  base_channel: 64
+  growing_channel: 32
+  num_blocks_g: 12
+  num_blocks_d: 7
+  network: esrgan
+
+dataset:
+  name: bsds500
+  img_size: 256
+  channel: 3
+  scale_factor: 2
+
+train:
+  generator_lr: 0.0001
+  discriminator_lr: 0.0001
+  epochs: 50
+  batch_size: 4
+  d_step: 1
+  g_step: 1
+
+inference:
+  num_samples: 16
+
+device: cuda

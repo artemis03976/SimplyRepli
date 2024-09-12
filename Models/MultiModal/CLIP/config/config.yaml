@@ -1,0 +1,31 @@
+project_name: clip
+
+model:
+  vision:
+    patch_size: 16
+    vision_num_layers: 6
+    vision_num_heads: 8
+    vision_mlp_dim: 1024
+  text:
+    text_embed_dim: 768
+    text_num_layers: 6
+    text_num_heads: 8
+    text_mlp_dim: 1024
+  align_dim: 768
+  network: vit
+
+dataset:
+  name: fashion_mnist
+  channel: 1
+  img_size: 28
+  text_max_len: 5000
+
+train:
+  learning_rate: 0.0002
+  epochs: 5
+  batch_size: 128
+
+inference:
+  num_samples: 16
+
+device: cuda

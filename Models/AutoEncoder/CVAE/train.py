@@ -76,7 +76,7 @@ def main():
             # get input and output dims
             input_dim = output_dim = config.channel * config.img_size[0] * config.img_size[1]
         else:
-            input_dim = output_dim = config.img_size ** 2
+            input_dim = output_dim = config.channel * config.img_size ** 2
 
         model = LinearCVAE(
             input_dim,

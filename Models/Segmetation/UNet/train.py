@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 from config.config import UNetConfig
 from model import UNet
-from Models.UNet.utilis import crop, load_data
+from Models.Segmetation.utilis import crop, load_data
 from global_utilis.early_stopping import EarlyStopping
 from global_utilis import save_and_load
 

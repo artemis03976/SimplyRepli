@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from Models.UNet.TransUNet.modules.vision_transformer import VisionTransformer
+from Models.Segmetation.TransUNet.modules.vision_transformer import VisionTransformer
 
 
 class EncoderBottleneck(nn.Module):

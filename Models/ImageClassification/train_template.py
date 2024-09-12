@@ -93,7 +93,7 @@ def train_step(model, config, train_info, criterion, optimizer):
         num_samples += image.shape[0]
 
         # set progress bar info
-        train_info.set_postfix(Loss=loss.item(), Acc=acc / image.shape[0])
+        train_info.set_postfix(Loss=loss.item(), Acc=acc.item() / image.shape[0])
 
     return total_loss / len(train_info), total_accuracy / num_samples
 

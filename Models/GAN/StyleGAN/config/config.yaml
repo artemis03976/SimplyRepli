@@ -1,0 +1,27 @@
+project_name: stylegan
+
+model:
+  generator_in_channel: 512
+  latent_dim: 256
+  style_dim: 256
+  loss: wgan_gp
+  network: stylegan
+
+dataset:
+  name: mnist
+  channel: 3
+  img_size: 1024
+
+train:
+  generator_lr: 0.0002
+  discriminator_lr: 0.0002
+  epochs: 50
+  batch_size: 16
+  grad_penalty_weight: 10
+  d_step: 1
+  g_step: 5
+
+inference:
+  num_samples: 64
+
+device: cuda

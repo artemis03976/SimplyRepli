@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from Models.UNet.utilis import crop
+from Models.Segmetation.utilis import crop
 
 
 class ConvBlock(nn.Module):
