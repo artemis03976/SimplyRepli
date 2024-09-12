@@ -1,4 +1,4 @@
-# RepliForDeeper: Some Minimal Implementation of Classical Deep Learning Models in Various Domains
+# SimplyRepli: Some Minimal Implementation of Classical Deep Learning Models in Various Domains
 
 [\[📖中文版\]](./README_zh.md)
 
